@@ -1,0 +1,67 @@
+img {
+    max-width: 100%;
+    max-height: 100%
+}
+
+a {
+    max-width: 100%;
+    max-height: 100%
+}
+
+div[name=view-container] {
+    width: 400px
+}
+
+div[name=thumbnail-container] {
+    width: 30px;
+    height: 20px;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+div[name=thumbnail-container-vertical] {
+    width: 30px;
+    height: 20px;
+    display: block;
+}
+
+table {
+    max-width:1080px;
+    max-width: 100%;
+}
+
+/* th.proj {
+    width: 40px
+}
+
+th.imgbox-container {
+    width: 400px;
+} */
+
+div[name=table-container] {
+    width:1080px
+}
+
+div[name=preview-container] {
+    display: block;
+    max-height: 600px;
+    max-width: 600px;
+}
+
+.caption-container {
+    display: inline-block;
+}
+
+.caption-container-home {
+    display: inline-block;
+}
+
+.line-img {
+    width:1px;
+    height:1px;
+    display: inline-block;
+}
+
+.imgtext{
+    margin: 0px
+}
