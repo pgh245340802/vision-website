@@ -29,7 +29,7 @@ To have the program running on local environments, simply clone this GitHub repo
 
 Before running, open the program generate-web.py and change the global variable UTILSPATH to the one where you have your utils folder is. Now you are ready to run the program. 
 
-## Running the program
+## Running the Program
 
 The program can be executed from the command line like this:
 
@@ -37,15 +37,28 @@ The program can be executed from the command line like this:
 python3 generate-web.py [path of scene folder]
 ```
 
-The program might take a while to complete, since it is converting a lot of images stored in the folders.
+The program might take a while to complete, since it is converting a lot of images stored in the folders. After the program is completed, open the generated home.html in your folder. This webpage is the home page and includes links to all other generated webpages. 
 
 ### Understanding what the program does
 
-1. The program goes through the whole folder, finds all relevant pfms, and for each pfm, three pngs are generated: *name*-jet.png, *name*-spiral.png, *name*-jet-400.jpg, *name*-jet-600.jpg, *name*-spiral-400.jpg and *name*-spiral-600.jpg. All images are stored in the exact same folder structure under ./src/pngs/*scenename*.
+1. The program goes through the whole folder, finds all relevant pfms, and for each pfm, six pngs are generated: *name*-jet.png, *name*-spiral.png, *name*-jet-400.jpg, *name*-jet-600.jpg, *name*-spiral-400.jpg and *name*-spiral-600.jpg. All images are stored in the exact same folder structure under ./src/pngs/*scenename*. Different disparity ranges are used to convert each pfm:
+
+    a. For unmerged decoded images, the program uses the disparity range from unrectified refined images for all. Each projector position has a disparity range that all images under it use. The program goes through all unrectified refined images under the same projector position, records the minimum and maximum disparity of each image, and finally uses the minimum of the minimum and maximum of the maximum as the communal disparity range for all images under this projector position. This range is written into a text file stored under each proj folder. 
+
+    b. For merged images, a similar process is carried out. However, this time, not all images under the same projector position share the same disparity range. Instead, each image pair, e.g. pos01 and pos10, share the same disparity range. The program finds the minimum and maximum disparity for both images. Then, for the second position, it swaps and minimum and maximum and changes their signs. Then the program uses the minimum of the minimum and maximum of the maximum as the communal disparity range for these two positions. This range is written into a text file stored under each pos folder except for the last one since there are one fewer pair than positions. 
+
 2. The program creates an HTML file named home.html, which contains a table of all scenes. **This is the one you should visit after the program is completed**.
 3. The program loops through all scene folders and adds one row for each scene. It also creates the following webpages for each scene: *scenename*-decoded.html, *scenename*-calib.html, *scenename*-xdisparity.html and *scenename*-ydisparity.html. There are links to all of them on the home page.
 
-## Potential improvements:
+### Important functions of the website
+
+1. There are previews of images from all camera positions under each main image, and the user can mouse over them to change the main images displayed.
+
+2. There are previews of images from all projector positions on the left of the row that has different projector positions, and the user can mouse over them to change the main images displayed.
+
+3. In each detailed scene page(decoded, xdisparity, ydisparity), the user can choose to view only the rectified images or only the unrectified ones. The user can also switch between viewing images in 400 width and 600 width. Finally, the user can also switch between spiral and jet pngs.
+
+## Potential Improvements:
 
 As the summer approaches an end, I have to leave the program as it is. However, the following improvements could be made to the program, either by myself after summer, or by another student who keeps working on the project. Once a improvement is completed, it is marked italics. 
 
@@ -54,6 +67,8 @@ As the summer approaches an end, I have to leave the program as it is. However, 
 2. Display the disparity range used to convert each pfm below each file name.
 
 3. Some of the ydisparity images appear oddly blue. This might have something to do with the minimum and maximum values used to convert them from pfms to pngs. 
+
+4. The formatting of the webpage changes a bit after toggling between different buttons. It needs to stay the same.s
 
 ## Authors
 
