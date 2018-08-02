@@ -4,7 +4,7 @@ import sys
 import subprocess
 import glob
 
-UTILSPATH = "~/research/ComputerVisionResearch/utils2/"
+UTILSPATH = "/home/tianxingd/research/ComputerVisionResearch/utils2/"
 UNRECTIFIED = ["/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-0initial.pfm",
 "/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-4refined2.pfm",
 "/computed/disparity/unrectified/proj*/pos*/disp[0-9][0-9][x,y]-0initial.pfm",
@@ -95,7 +95,8 @@ def read_min_max(directory, scenename):
             filepath = "%s/pos*/result[0-9]%s-4refined2.pfm" % (proj, i)
             filelist = glob.glob(filepath)
             for file in filelist:
-                imginfo = "../utils2/imginfo"
+                # imginfo = "../utils2/imginfo"
+                imginfo = UTILSPATH + "imginfo"
                 min_max = subprocess.check_output([imginfo, "-m", file])
                 min_max = min_max.decode().split()
                 mins.append(float(min_max[0]))
@@ -127,10 +128,10 @@ def read_min_max(directory, scenename):
             filelist.sort()
             counter = 0
             for file in filelist:
-                imginfo = "../utils2/imginfo"
+                # imginfo = "../utils2/imginfo"
+                imginfo = UTILSPATH + "imginfo"
                 min_max = subprocess.check_output([imginfo, "-m", file])
                 min_max = min_max.decode().split()
-                print(min_max)
                 if counter >0:
                     mins.append(-float(min_max[1]))
                     maxs.append(-float(min_max[0]))

@@ -20,6 +20,7 @@ More details about installing yattag can be found here:http://www.yattag.org/dow
 
 You should also have ImageMagick(http://www.imagemagick.org/script/index.php) installed on your computer before you try to run the program since it uses ImageMagick to resize images and convert formats. Here is a link to the instrunctions to download ImageMagick onto your own computer: http://www.imagemagick.org/script/download.php. If you are not familiar with ImageMagick, here is a brief guide to what it can do and how to use it: http://www.imagemagick.org/Usage/. However, this is not necessary for this project since all ImageMagick commands are already written.
 
+Finally, before we can have the everything running, this program uses the the pfm2png cpp program from Professor Scharstein's utils folder. Copy that folder from basin, and remake it locally. 
 
 
 ### Installing
