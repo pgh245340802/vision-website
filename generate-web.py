@@ -669,6 +669,8 @@ def calibration(directory, scenename):
     return filename
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("usage: python3 generate-web.py [path of scene folder]")
     directory = sys.argv[1]
     if directory[-1] != "/":
         directory = directory + "/"
