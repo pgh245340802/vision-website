@@ -70,7 +70,7 @@ As the summer approaches an end, I have to leave the program as it is. However, 
 
 4. The formatting of the webpage changes a bit after toggling between different buttons. It needs to stay the same.s
 
-## Authors
+## Author
 
 * **Roger Dai** - *Initial work* 
 
