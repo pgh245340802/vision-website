@@ -72,7 +72,7 @@ As the summer approaches an end, I have to leave the program as it is. However, 
 
 ## Author
 
-* **Roger Dai** - *Initial work* 
+* **Roger Dai**
 
 ## Acknowledgments
 
