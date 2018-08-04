@@ -26,8 +26,8 @@ def duplicate_folders(inputpath, outputpath):
         structure = outputpath + dirpath[len(inputpath):]
         if not os.path.isdir(structure):
             os.mkdir(structure)
-        # else:
-        #     print("Folder does already exits!")
+        else:
+            print("Folder does already exits!")
 
 def convert_pfms(directory):
     dirnames = os.listdir(directory)
@@ -36,52 +36,52 @@ def convert_pfms(directory):
         if dirname[0] != ".":
             scenes.append(dirname)
     scenes.sort()
-    # for scenename in scenes:
-    #     command = "mkdir ./src/pngs/" + scenename
-    #     os.system(command)
-    #     inputpath = directory + scenename
-    #     outputpath = "./src/pngs/" + scenename
-    #     duplicate_folders(inputpath, outputpath)
-    #     # -------------------------------------DECODED----------------------------------
-    #     for LIST in [UNRECTIFIED[:2], RECTIFIED[:2]]:
-    #         for pfm in LIST:
-    #             filename= directory + scenename + pfm
-    #             sublist = glob.glob(filename)
-    #             for file in sublist:
-    #                 if os.path.isfile(file):
-    #                     txtpath = directory + scenename +"/computed/decoded/unrectified/proj"
-    #                     txtpath = txtpath + file[file.find("proj")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
-    #                     txt = open(txtpath, "r")
-    #                     minmax = txt.read().split()
-    #                     savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
-    #                     pfm2png(file, savepath, minmax[0], minmax[1])
-    #                 else:
-    #                     print("%s does not exist!!" % (file))
+    for scenename in scenes:
+        command = "mkdir ./src/pngs/" + scenename
+        os.system(command)
+        inputpath = directory + scenename
+        outputpath = "./src/pngs/" + scenename
+        duplicate_folders(inputpath, outputpath)
+        # -------------------------------------DECODED----------------------------------
+        for LIST in [UNRECTIFIED[:2], RECTIFIED[:2]]:
+            for pfm in LIST:
+                filename= directory + scenename + pfm
+                sublist = glob.glob(filename)
+                for file in sublist:
+                    if os.path.isfile(file):
+                        txtpath = directory + scenename +"/computed/decoded/unrectified/proj"
+                        txtpath = txtpath + file[file.find("proj")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
+                        txt = open(txtpath, "r")
+                        minmax = txt.read().split()
+                        savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
+                        pfm2png(file, savepath, minmax[0], minmax[1])
+                    else:
+                        print("%s does not exist!!" % (file))
 
-    #     # --------------------------------DISPARITY----------------------------------------
-        # for LIST in [UNRECTIFIED[2:], RECTIFIED[2:]]:
-        #     for pfm in LIST:
-        #         filename= directory + scenename + pfm
-        #         sublist = glob.glob(filename)
-        #         for file in sublist:
-        #             if os.path.isfile(file):
-        #                 if file[file.rfind("-")-1] == "x":
-        #                     txtpath = directory + scenename +"/computed/merged2/pos"
-        #                 else:
-        #                     txtpath = directory + scenename +"/computed/merged/rectified/pos"
-        #                 txtpath = txtpath + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
-        #                 txt = open(txtpath, "r")
-        #                 minmax = txt.read().split()
-        #                 savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
-        #                 if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
-        #                     pfm2png(file, savepath, minmax[0], minmax[1])
-        #                 else:
-        #                     pfm2png(file, savepath, "-"+minmax[0], "-"+minmax[1])
-        #             else:
-        #                 print("%s does not exist!!" % (file))
+        # --------------------------------DISPARITY----------------------------------------
+        for LIST in [UNRECTIFIED[2:], RECTIFIED[2:]]:
+            for pfm in LIST:
+                filename= directory + scenename + pfm
+                sublist = glob.glob(filename)
+                for file in sublist:
+                    if os.path.isfile(file):
+                        if file[file.rfind("-")-1] == "x":
+                            txtpath = directory + scenename +"/computed/merged2/pos"
+                        else:
+                            txtpath = directory + scenename +"/computed/merged/rectified/pos"
+                        txtpath = txtpath + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
+                        txt = open(txtpath, "r")
+                        minmax = txt.read().split()
+                        savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
+                        if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
+                            pfm2png(file, savepath, minmax[0], minmax[1])
+                        else:
+                            pfm2png(file, savepath, "-"+minmax[0], "-"+minmax[1])
+                    else:
+                        print("%s does not exist!!" % (file))
             
 
-    #     resize_origs(directory, scenename)
+        resize_origs(directory, scenename)
     return scenes
 
 def read_min_max(directory, scenename):
@@ -174,59 +174,41 @@ def resize_origs(directory, scenename):
 
 def pfm2png(filepath, savepath, minimum, maximum):
 
-    # if os.path.isfile("%s-jet.png" % (savepath)):
-    #     print("Jet PNG exists already!")
-    # else:
-    #     command = "%spfm2png -m %s -d %s -j %s %s-jet.png" % (UTILSPATH, minimum, maximum, filepath, savepath)
-    #     os.system(command)
+    if os.path.isfile("%s-jet.png" % (savepath)):
+        print("Jet PNG exists already!")
+    else:
+        command = "%spfm2png -m %s -d %s -j %s %s-jet.png" % (UTILSPATH, minimum, maximum, filepath, savepath)
+        os.system(command)
 
-    # if os.path.isfile("%s-spiral.png" % (savepath)):
-    #     print("Spiral PNG exists already!")
-    # else:
-    #     command = "%spfm2png -m %s -d %s -s %s %s-spiral.png" % (UTILSPATH, minimum, maximum, filepath, savepath)
-    #     os.system(command)
+    if os.path.isfile("%s-spiral.png" % (savepath)):
+        print("Spiral PNG exists already!")
+    else:
+        command = "%spfm2png -m %s -d %s -s %s %s-spiral.png" % (UTILSPATH, minimum, maximum, filepath, savepath)
+        os.system(command)
 
-    # if os.path.isfile("%s-jet-400.jpg" % (savepath)):
-    #     print("Resized jet JPG exists already!")
-    # else:
-    #     command = "convert %s-jet.png -resize 400x400 %s-jet-400.jpg" % (savepath, savepath)
-    #     os.system(command)
+    if os.path.isfile("%s-jet-400.jpg" % (savepath)):
+        print("Resized jet JPG exists already!")
+    else:
+        command = "convert %s-jet.png -resize 400x400 %s-jet-400.jpg" % (savepath, savepath)
+        os.system(command)
 
-    # if os.path.isfile("%s-jet-600.jpg" % (savepath)):
-    #     print("Resized jet JPG exists already!")
-    # else:
-    #     command = "convert %s-jet.png -resize 600x600 %s-jet-600.jpg" % (savepath, savepath)
-    #     os.system(command)
+    if os.path.isfile("%s-jet-600.jpg" % (savepath)):
+        print("Resized jet JPG exists already!")
+    else:
+        command = "convert %s-jet.png -resize 600x600 %s-jet-600.jpg" % (savepath, savepath)
+        os.system(command)
 
-    # if os.path.isfile("%s-spiral-400.jpg" % (savepath)):
-    #     print("Resized jet JPG exists already!")
-    # else:
-    #     command = "convert %s-spiral.png -resize 400x400 %s-spiral-400.jpg" % (savepath, savepath)
-    #     os.system(command)
+    if os.path.isfile("%s-spiral-400.jpg" % (savepath)):
+        print("Resized jet JPG exists already!")
+    else:
+        command = "convert %s-spiral.png -resize 400x400 %s-spiral-400.jpg" % (savepath, savepath)
+        os.system(command)
 
-    # if os.path.isfile("%s-spiral-600.jpg" % (savepath)):
-    #     print("Resized jet JPG exists already!")
-    # else:
-    #     command = "convert %s-spiral.png -resize 600x600 %s-spiral-600.jpg" % (savepath, savepath)
-    #     os.system(command)
-
-    command = "%spfm2png -m %s -d %s -j %s %s-jet.png" % (UTILSPATH, minimum, maximum, filepath, savepath)
-    os.system(command)
-
-    command = "%spfm2png -m %s -d %s -s %s %s-spiral.png" % (UTILSPATH, minimum, maximum, filepath, savepath)
-    os.system(command)
-
-    command = "convert %s-jet.png -resize 400x400 %s-jet-400.jpg" % (savepath, savepath)
-    os.system(command)
-
-    command = "convert %s-jet.png -resize 600x600 %s-jet-600.jpg" % (savepath, savepath)
-    os.system(command)
-
-    command = "convert %s-spiral.png -resize 400x400 %s-spiral-400.jpg" % (savepath, savepath)
-    os.system(command)
-
-    command = "convert %s-spiral.png -resize 600x600 %s-spiral-600.jpg" % (savepath, savepath)
-    os.system(command)
+    if os.path.isfile("%s-spiral-600.jpg" % (savepath)):
+        print("Resized jet JPG exists already!")
+    else:
+        command = "convert %s-spiral.png -resize 600x600 %s-spiral-600.jpg" % (savepath, savepath)
+        os.system(command)
 
 def home(directory, scenes):
     home, tag, text = Doc().tagtext()
