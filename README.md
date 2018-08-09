@@ -60,7 +60,7 @@ The program might take a while to complete, since it is converting a lot of imag
 
 ## Potential Improvements:
 
-As the summer approaches an end, I have to leave the program as it is. However, the following improvements could be made to the program, either by myself after summer, or by another student who keeps working on the project. Once a improvement is completed, it is marked italics. 
+As the summer approaches an end, I have to leave the program as it is. However, the following improvements could be made to the program, either by myself after summer, or by another student who keeps working on the project. Once a improvement is completed, it will be marked italics. 
 
 1. Update the text descriptions on the website to fit the new dataset.
 
