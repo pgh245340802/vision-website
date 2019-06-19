@@ -4,7 +4,7 @@ import sys
 import subprocess
 import glob
 
-UTILSPATH = "/home/tianxingd/research/ComputerVisionResearch/utils2/"
+UTILSPATH = "/Users/mango_sucks/Middlebury/CS/2019_summer_research/utils2/"
 UNRECTIFIED = ["/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-0initial.pfm",
 "/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-4refined2.pfm",
 "/computed/disparity/unrectified/proj*/pos*/disp[0-9][0-9][x,y]-0initial.pfm",
