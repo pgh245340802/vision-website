@@ -4,7 +4,7 @@ import sys
 import subprocess
 import glob
 
-UTILSPATH = "/Users/mango_sucks/Middlebury/CS/2019_summer_research/utils2/"
+UTILSPATH = "/home/gpan/2019_summer_research/utils2/"
 UNRECTIFIED = ["/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-0initial.pfm",
 "/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-4refined2.pfm",
 "/computed/disparity/unrectified/proj*/pos*/disp[0-9][0-9][x,y]-0initial.pfm",
@@ -29,14 +29,19 @@ def duplicate_folders(inputpath, outputpath):
         else:
             print("Folder does already exits!")
 
+def is_scene_directory(directory_path):
+    return os.path.isdir(directory_path) and os.path.isdir(directory_path + "computed") and os.path.isdir(directory_path + "orig") and os.path.isdir(directory_path + "settings")
+
 def convert_pfms(directory):
     dirnames = os.listdir(directory)
     scenes = []
     for dirname in dirnames:
-        if dirname[0] != ".":
+        if is_scene_directory(directory + dirname + "/"):
             scenes.append(dirname)
     scenes.sort()
     for scenename in scenes:
+        if os.path.isdir("./src/pngs/"+ scenename):
+            continue
         command = "mkdir ./src/pngs/" + scenename
         os.system(command)
         inputpath = directory + scenename
@@ -79,74 +84,81 @@ def convert_pfms(directory):
                             pfm2png(file, savepath, "-"+minmax[0], "-"+minmax[1])
                     else:
                         print("%s does not exist!!" % (file))
-            
+
 
         resize_origs(directory, scenename)
     return scenes
 
-def read_min_max(directory, scenename):
-    projpath = directory + scenename +"/computed/decoded/unrectified/proj*"
-    projlist = glob.glob(projpath)
-    projlist.sort()
-    for proj in projlist:
-        for i in ["u","v"]:
-            mins = []
-            maxs = []
-            filepath = "%s/pos*/result[0-9]%s-4refined2.pfm" % (proj, i)
-            filelist = glob.glob(filepath)
-            for file in filelist:
-                # imginfo = "../utils2/imginfo"
-                imginfo = UTILSPATH + "imginfo"
-                min_max = subprocess.check_output([imginfo, "-m", file])
-                min_max = min_max.decode().split()
-                mins.append(float(min_max[0]))
-                maxs.append(float(min_max[1]))
-            truemin = str(min(mins))
-            truemax = str(max(maxs))
-            txtpath = "%s/minmax-%s.txt" % (proj, i)
-            txt = open(txtpath, "w")
-            txt.write(truemin+"\n")
-            txt.write(truemax+"\n")
-            txt.close
-    
-
-    for i in ["x", "y"]:
-        if i == "x":
-            path = directory + scenename + "/computed/merged2"
-        else:
-            path = directory + scenename + "/computed/merged/rectified"
-        posnum = len(glob.glob(path+"/pos*"))
-        for j in range(posnum-1):
-            mins = []
-            maxs = []
-            pos = str(j)+str(j+1)
-            if i == "x":
-                filepath = "%s/pos*/disp%s%s-4crosscheck2.pfm" % (path, pos, i)
-            else:
-                filepath = "%s/pos*/disp%s%s-1crosscheck.pfm" % (path, pos, i)
-            filelist = glob.glob(filepath)
-            filelist.sort()
-            counter = 0
-            for file in filelist:
-                # imginfo = "../utils2/imginfo"
-                imginfo = UTILSPATH + "imginfo"
-                min_max = subprocess.check_output([imginfo, "-m", file])
-                min_max = min_max.decode().split()
-                if counter >0:
-                    mins.append(-float(min_max[1]))
-                    maxs.append(-float(min_max[0]))
-                else:
+def read_min_max(directory):
+    dirnames = os.listdir(directory)
+    scenes = []
+    for dirname in dirnames:
+        if dirname[0] != ".":
+            scenes.append(dirname)
+    scenes.sort()
+    for scenename in scenes:
+        projpath = directory + scenename +"/computed/decoded/unrectified/proj*"
+        projlist = glob.glob(projpath)
+        projlist.sort()
+        for proj in projlist:
+            for i in ["u","v"]:
+                mins = []
+                maxs = []
+                filepath = "%s/pos*/result[0-9]%s-4refined2.pfm" % (proj, i)
+                filelist = glob.glob(filepath)
+                for file in filelist:
+                    # imginfo = "../utils2/imginfo"
+                    imginfo = UTILSPATH + "imginfo"
+                    min_max = subprocess.check_output([imginfo, "-m", file])
+                    min_max = min_max.decode().split()
                     mins.append(float(min_max[0]))
                     maxs.append(float(min_max[1]))
-                counter += 1
-            truemin = str(min(mins))
-            truemax = str(max(maxs))
-            txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
-            txt = open(txtpath, "w")
-            txt.write(truemin+"\n")
-            txt.write(truemax+"\n")
-            txt.close
-   
+                truemin = str(min(mins))
+                truemax = str(max(maxs))
+                txtpath = "%s/minmax-%s.txt" % (proj, i)
+                txt = open(txtpath, "w")
+                txt.write(truemin+"\n")
+                txt.write(truemax+"\n")
+                txt.close
+
+
+        for i in ["x", "y"]:
+            if i == "x":
+                path = directory + scenename + "/computed/merged2"
+            else:
+                path = directory + scenename + "/computed/merged/rectified"
+            posnum = len(glob.glob(path+"/pos*"))
+            for j in range(posnum-1):
+                mins = []
+                maxs = []
+                pos = str(j)+str(j+1)
+                if i == "x":
+                    filepath = "%s/pos*/disp%s%s-4crosscheck2.pfm" % (path, pos, i)
+                else:
+                    filepath = "%s/pos*/disp%s%s-1crosscheck.pfm" % (path, pos, i)
+                filelist = glob.glob(filepath)
+                filelist.sort()
+                counter = 0
+                for file in filelist:
+                    # imginfo = "../utils2/imginfo"
+                    imginfo = UTILSPATH + "imginfo"
+                    min_max = subprocess.check_output([imginfo, "-m", file])
+                    min_max = min_max.decode().split()
+                    if counter >0:
+                        mins.append(-float(min_max[1]))
+                        maxs.append(-float(min_max[0]))
+                    else:
+                        mins.append(float(min_max[0]))
+                        maxs.append(float(min_max[1]))
+                    counter += 1
+                truemin = str(min(mins))
+                truemax = str(max(maxs))
+                txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
+                txt = open(txtpath, "w")
+                txt.write(truemin+"\n")
+                txt.write(truemax+"\n")
+                txt.close
+
 def resize_origs(directory, scenename):
     PATH = directory + scenename + "/orig/calibration/stereo/"
     positions = glob.glob(PATH + "pos*")
@@ -259,7 +271,7 @@ def home(directory, scenes):
                             calibpage = calibration(directory, scenename)
                             with tag("a", href=calibpage, style="display:block"):
                                 text("calibration")
-                            
+
                         with tag("th"):
                             # --------------------------ORIGINAL--------------------------------
                             with tag("div", name="preview-container"):
@@ -277,8 +289,8 @@ def home(directory, scenes):
                                     with tag("div", name="thumbnail-container"):
                                         img = "%s/exp1/IMG1.JPG" % (pos)
                                         with tag("a", href = img.replace("./src/pngs/", directory)):
-                                            home.stag("img", src=img, klass="row"+str(row), name="thumbnail", 
-                                            id="thumb"+str(row)+str(position)+str(no), 
+                                            home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
+                                            id="thumb"+str(row)+str(position)+str(no),
                                             onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
                                     position += 1
 
@@ -288,7 +300,7 @@ def home(directory, scenes):
 
                         with tag("th"):
                             source = "./src/pngs/%s/computed/merged2/pos1/disp01x-4crosscheck2-jet-400.jpg" % (scenename)
-                            imageBoxDual(home, tag, text, "x"+str(row), source, 2, row, reverse=True)   
+                            imageBoxDual(home, tag, text, "x"+str(row), source, 2, row, reverse=True)
 
                     row += 1
 
@@ -320,7 +332,7 @@ def imageBox(doc, tag, text, name, source, no, row, rec = "rec"):
                 tag2 = source[firstindex+1:secondindex]
                 img = "%s/%s%s%s-%s-jet-400.jpg" % (pos, tag1, str(position), name[0],tag2)
                 with tag("a", href = img.replace("-400.jpg", ".png"), klass="imglink"):
-                    doc.stag("img", src=img, klass=class1 + rec, name=rec, id="thumb"+str(row)+str(position)+str(no), 
+                    doc.stag("img", src=img, klass=class1 + rec, name=rec, id="thumb"+str(row)+str(position)+str(no),
                     onmouseover="posUpdate('%s', %s)" % (str(row), str(position)))
             position += 1
 
@@ -355,17 +367,17 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", reverse=False
                     if os.path.isfile(img):
                         with tag("div", name="thumbnail-container"):
                             with tag("a", href = img.replace("-400.jpg", ".png"), klass="imglink"):
-                                doc.stag("img", src=img, klass=class1 + rec, 
-                                id="thumb"+str(row)+str(position)+str(position-1)+str(no), 
+                                doc.stag("img", src=img, klass=class1 + rec,
+                                id="thumb"+str(row)+str(position)+str(position-1)+str(no),
                                 onmouseover="posUpdateDisp('%s', '%s')" % (str(row), str(position-1)+str(position)))
 
             else:
                 img = "%s/%s%s%s%s-jet-400.jpg" % (pos, tag1, str(position)+str(position+1), name[0],tag2)
                 if os.path.isfile(img):
-                    with tag("div", name="thumbnail-container"):    
+                    with tag("div", name="thumbnail-container"):
                         with tag("a", href = img.replace("-400.jpg", ".png"), klass="imglink"):
                             doc.stag("img", src=img, klass=class1 + rec,
-                            id="thumb"+str(row)+str(position)+str(position+1)+str(no), 
+                            id="thumb"+str(row)+str(position)+str(position+1)+str(no),
                             onmouseover="posUpdateDisp('%s', '%s')" % (str(row), str(position)+str(position+1)))
             position += 1
 
@@ -384,8 +396,8 @@ def disparity(scenename, xy):
             with tag("h3"):
                 text("Description:")
             with tag("p"):
-                text("""This webpage displays all relevant images in the image processing pipeline. 
-                On the left, mouse over different previews to see different projector positions. 
+                text("""This webpage displays all relevant images in the image processing pipeline.
+                On the left, mouse over different previews to see different projector positions.
                 Below each main image, mouse over the previews to see different camera positions.
                 The tags also show you which image you are viewing. If the position is identified with three digits, e.g. pos223,
                 it means that you are viewing the processed image between different camera positions. The last two digits suggest
@@ -456,8 +468,8 @@ def disparity(scenename, xy):
                                                     with tag("a", href = img.replace("-400.jpg", "-jet.png")):
                                                         doc.stag("img", src=img, name=rec, id="proj"+str(proj[-1]),
                                                         onmouseover = "projChange(%s, %s)" % (proj[-1], str(row)))
-                                
-                                if os.path.isfile(source):        
+
+                                if os.path.isfile(source):
                                     with tag("th", klass = "imgbox-container"):
                                         source = sublist[0].replace("01x", "01"+xy)
                                         imageBoxDual(doc, tag, text, xy+str(row), source, 1, row, rec)
@@ -492,8 +504,8 @@ def decoded(scenename):
             with tag("h3"):
                 text("Description:")
             with tag("p"):
-                text("""This webpage displays all relevant images in the image processing pipeline. 
-                On the left, mouse over different previews to see different projector positions. 
+                text("""This webpage displays all relevant images in the image processing pipeline.
+                On the left, mouse over different previews to see different projector positions.
                 Below each main image, mouse over the previews to see different camera positions.
                 The tags also show you which image you are viewing. If the position is identified with three digits, e.g. pos223,
                 it means that you are viewing the processed image between different camera positions. The last two digits suggest
@@ -547,7 +559,7 @@ def decoded(scenename):
                         sublist.sort()
                         if sublist != []:
                             with tag("tr", klass=rec):
-                                
+
                                 with tag("th", klass = "proj"):
                                     if "/proj*/" in file:
                                         projlist = glob.glob(filename[:filename.rfind("/pos")])
@@ -563,8 +575,8 @@ def decoded(scenename):
                                                 with tag("a", href = img.replace("-400.jpg", ".png")):
                                                     doc.stag("img", src=img, name=rec, id="proj"+str(proj[-1]),
                                                     onmouseover = "projChange(%s, %s)" % (proj[-1], str(row)))
-                                        
-                                    
+
+
 
                                 with tag("th", klass = "imgbox-container"):
                                     source = sublist[0]
@@ -651,11 +663,13 @@ def calibration(directory, scenename):
     return filename
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("usage: python3 generate-web.py [path of scene folder]")
-    directory = sys.argv[1]
-    if directory[-1] != "/":
-        directory = directory + "/"
-    read_min_max(directory,"animals2")
-    scenes = convert_pfms(directory)
-    home(directory, scenes)
+    if not os.path.isdir('./src'):
+        print("Creating folder structures..")
+        command = "mkdir ./src && mkdir ./src/pngs && mkdir ./src/scenes"
+        os.system(command)
+        print("Put your scene folder in ./src/scenes, then run: python3 generate-web.py")
+    else:
+        directory = "./src/scenes/"
+        read_min_max(directory)
+        scenes = convert_pfms(directory)
+        home(directory, scenes)
