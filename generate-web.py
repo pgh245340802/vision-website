@@ -64,9 +64,11 @@ def convert_pfms(directory):
                         print("%s does not exist!!" % (file))
 
         # --------------------------------DISPARITY----------------------------------------
-        for LIST in [UNRECTIFIED[2:], RECTIFIED[2:]]:
+#        for LIST in [UNRECTIFIED[2:], RECTIFIED[2:]]:
+        for LIST in [RECTIFIED[2:]]:
             for pfm in LIST:
                 filename= directory + scenename + pfm
+                print("filename:" + filename)
                 sublist = glob.glob(filename)
                 for file in sublist:
                     if os.path.isfile(file):
@@ -74,14 +76,18 @@ def convert_pfms(directory):
                             txtpath = directory + scenename +"/computed/merged2/pos"
                         else:
                             txtpath = directory + scenename +"/computed/merged/rectified/pos"
+                        print("txtpath:" + txtpath)
                         txtpath = txtpath + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
+                        print("file name :" + file)
+                        print("before dash: "+ file[file.rfind("-")-1])
                         txt = open(txtpath, "r")
                         minmax = txt.read().split()
+                        print("minmax:" + minmax[0] + minmax[1])
                         savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
                         if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
                             pfm2png(file, savepath, minmax[0], minmax[1])
                         else:
-                            pfm2png(file, savepath, "-"+minmax[0], "-"+minmax[1])
+                            pfm2png(file, savepath, str(-float(minmax[0])), str(-float(minmax[1])))
                     else:
                         print("%s does not exist!!" % (file))
 
@@ -107,7 +113,6 @@ def read_min_max(directory):
                 filepath = "%s/pos*/result[0-9]%s-4refined2.pfm" % (proj, i)
                 filelist = glob.glob(filepath)
                 for file in filelist:
-                    # imginfo = "../utils2/imginfo"
                     imginfo = UTILSPATH + "imginfo"
                     min_max = subprocess.check_output([imginfo, "-m", file])
                     min_max = min_max.decode().split()
@@ -140,7 +145,6 @@ def read_min_max(directory):
                 filelist.sort()
                 counter = 0
                 for file in filelist:
-                    # imginfo = "../utils2/imginfo"
                     imginfo = UTILSPATH + "imginfo"
                     min_max = subprocess.check_output([imginfo, "-m", file])
                     min_max = min_max.decode().split()
@@ -190,6 +194,7 @@ def pfm2png(filepath, savepath, minimum, maximum):
         print("Jet PNG exists already!")
     else:
         command = "%spfm2png -m %s -d %s -j %s %s-jet.png" % (UTILSPATH, minimum, maximum, filepath, savepath)
+        print(command)
         os.system(command)
 
     if os.path.isfile("%s-spiral.png" % (savepath)):
@@ -223,14 +228,15 @@ def pfm2png(filepath, savepath, minimum, maximum):
         os.system(command)
 
 def home(directory, scenes):
+    command = "rm -f ./*.html"
+    os.system(command)
     home, tag, text = Doc().tagtext()
-
     home.asis("<!DOCTYPE html>")
     with tag("html"):
         with tag("head"):
             home.asis('<link rel="stylesheet" href="styles.css">')
             with tag("h1"):
-                text("Summer 2018 Dataset")
+                text("Summer 2019 Dataset")
         with tag("body"):
             with tag("p", name="comments"):
                 text("THIS DESCRIPTION WILL BE UPDATED")
