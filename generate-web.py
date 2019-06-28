@@ -4,11 +4,11 @@ import sys
 import subprocess
 import glob
 
-UTILSPATH = "/home/gpan/2019_summer_research/utils2/"
+UTILSPATH = "/home/gpan/public_html/2019_summer_research/utils2/"
 UNRECTIFIED = ["/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-0initial.pfm",
 "/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-4refined2.pfm",
 "/computed/disparity/unrectified/proj*/pos*/disp[0-9][0-9][x,y]-0initial.pfm",
-"/computed/disparity/unrectified/proj*/pos*/disp[0-9][0-9][x,y]-1crosscheck.pfm",
+"/computed/disparity/unrectified/proj*/pos*/disp[0-9][0-9][x,y]-1crosscheck1.pfm",
 "/computed/merged/unrectified/pos*/disp[0-9][0-9][x,y].pfm"]
 RECTIFIED = ["/computed/decoded/rectified/proj*/pos*/result[0-9][0-9][u,v]-0rectified.pfm",
 "/computed/decoded/rectified/proj*/pos*/result[0-9][0-9][u,v]-4refined2.pfm",
@@ -63,34 +63,55 @@ def convert_pfms(directory):
                     else:
                         print("%s does not exist!!" % (file))
 
-        # --------------------------------DISPARITY----------------------------------------
-#        for LIST in [UNRECTIFIED[2:], RECTIFIED[2:]]:
-        for LIST in [RECTIFIED[2:]]:
-            for pfm in LIST:
-                filename= directory + scenename + pfm
-                print("filename:" + filename)
-                sublist = glob.glob(filename)
-                for file in sublist:
-                    if os.path.isfile(file):
-                        if file[file.rfind("-")-1] == "x":
-                            txtpath = directory + scenename +"/computed/merged2/pos"
-                        else:
-                            txtpath = directory + scenename +"/computed/merged/rectified/pos"
-                        print("txtpath:" + txtpath)
-                        txtpath = txtpath + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
-                        print("file name :" + file)
-                        print("before dash: "+ file[file.rfind("-")-1])
-                        txt = open(txtpath, "r")
-                        minmax = txt.read().split()
-                        print("minmax:" + minmax[0] + minmax[1])
-                        savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
-                        if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
+        # --------------------------------RECTIFIED DISPARITY----------------------------------------
+        for pfm in RECTIFIED[2:]:
+            filename= directory + scenename + pfm
+            sublist = glob.glob(filename)
+            for file in sublist:
+                if os.path.isfile(file):
+                    if file[file.rfind("-")-1] == "x":
+                        txtpath = directory + scenename +"/computed/merged2/pos"
+                    else:
+                        txtpath = directory + scenename +"/computed/merged/rectified/pos"
+                    txtpath = txtpath + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
+                    txt = open(txtpath, "r")
+                    minmax = txt.read().split()
+                    savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
+                    if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
+                        if(float(minmax[0])>0):
                             pfm2png(file, savepath, minmax[0], minmax[1])
                         else:
-                            pfm2png(file, savepath, str(-float(minmax[0])), str(-float(minmax[1])))
+                            pfm2png(file, savepath, minmax[1], minmax[0])
                     else:
-                        print("%s does not exist!!" % (file))
+                        if(float(minmax[0])>0):
+                            pfm2png(file, savepath, str(-float(minmax[0])), str(-float(minmax[1])))
+                        else:
+                            pfm2png(file, savepath, str(-float(minmax[1])), str(-float(minmax[0])))
+                else:
+                    print("%s does not exist!!" % (file))
 
+        # --------------------------------UNRECTIFIED DISPARITY----------------------------------------
+        for pfm in UNRECTIFIED[2:4]:
+            filename= directory + scenename + pfm
+            sublist = glob.glob(filename)
+            for file in sublist:
+                if os.path.isfile(file):
+                    txtpath = directory + scenename +"/computed/disparity/unrectified/proj0/pos" + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
+                    txt = open(txtpath, "r")
+                    minmax = txt.read().split()
+                    savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
+                    if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
+                        if(float(minmax[0])>0):
+                            pfm2png(file, savepath, minmax[0], minmax[1])
+                        else:
+                            pfm2png(file, savepath, minmax[1], minmax[0])
+                    else:
+                        if(float(minmax[0])>0):
+                            pfm2png(file, savepath, str(-float(minmax[0])), str(-float(minmax[1])))
+                        else:
+                            pfm2png(file, savepath, str(-float(minmax[1])), str(-float(minmax[0])))
+                else:
+                    print("%s does not exist!!" % (file))
 
         resize_origs(directory, scenename)
     return scenes
@@ -99,10 +120,12 @@ def read_min_max(directory):
     dirnames = os.listdir(directory)
     scenes = []
     for dirname in dirnames:
-        if dirname[0] != ".":
+       if is_scene_directory(directory + dirname + "/"):
             scenes.append(dirname)
     scenes.sort()
     for scenename in scenes:
+
+        # -------------------------------------DECODED----------------------------------
         projpath = directory + scenename +"/computed/decoded/unrectified/proj*"
         projlist = glob.glob(projpath)
         projlist.sort()
@@ -126,7 +149,38 @@ def read_min_max(directory):
                 txt.write(truemax+"\n")
                 txt.close
 
+        # -------------------------------------UNRECTIFIED DISPARITY-------------------
+        for i in ["x", "y"]:
+            path = directory + scenename +"/computed/disparity/unrectified/proj0"
+            posnum = len(glob.glob(path+"/pos*"))
+            for j in range(posnum-1):
+                mins = []
+                maxs = []
+                pos = str(j)+str(j+1)
+                filepath = "%s/pos*/disp%s%s-1crosscheck1.pfm" % (path, pos, i)
+                filelist = glob.glob(filepath)
+                filelist.sort()
+                counter = 0
+                for file in filelist:
+                    imginfo = UTILSPATH + "imginfo"
+                    min_max = subprocess.check_output([imginfo, "-m", file])
+                    min_max = min_max.decode().split()
+                    if counter >0:
+                        mins.append(-float(min_max[1]))
+                        maxs.append(-float(min_max[0]))
+                    else:
+                        mins.append(float(min_max[0]))
+                        maxs.append(float(min_max[1]))
+                    counter += 1
+                truemin = str(min(mins))
+                truemax = str(max(maxs))
+                txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
+                txt = open(txtpath, "w")
+                txt.write(truemin+"\n")
+                txt.write(truemax+"\n")
+                txt.close
 
+        # -------------------------------------UNRECTIFIED DISPARITY-------------------
         for i in ["x", "y"]:
             if i == "x":
                 path = directory + scenename + "/computed/merged2"
@@ -194,7 +248,6 @@ def pfm2png(filepath, savepath, minimum, maximum):
         print("Jet PNG exists already!")
     else:
         command = "%spfm2png -m %s -d %s -j %s %s-jet.png" % (UTILSPATH, minimum, maximum, filepath, savepath)
-        print(command)
         os.system(command)
 
     if os.path.isfile("%s-spiral.png" % (savepath)):
@@ -265,6 +318,9 @@ def home(directory, scenes):
                     with tag("tr"):
                         with tag("th", style="width:100px"):
                             text(scenename)
+                            ambientpage = ambient(scenename)
+                            with tag("a", href=ambientpage, style="display:block"):
+                                text("ambient")
                             decodedpage = decoded(scenename)
                             with tag("a", href=decodedpage, style="display:block"):
                                 text("decoded")
@@ -274,7 +330,7 @@ def home(directory, scenes):
                             ydisparity = disparity(scenename, "y")
                             with tag("a", href=ydisparity, style="display:block"):
                                 text("Y disparity")
-                            calibpage = calibration(directory, scenename)
+                            calibpage = calibration(scenename)
                             with tag("a", href=calibpage, style="display:block"):
                                 text("calibration")
 
@@ -316,6 +372,9 @@ def home(directory, scenes):
     file = open("home.html", "w")
     file.write(HTML)
     file.close()
+
+def ambient(scenename):
+    return calibration(scenename)
 
 def imageBox(doc, tag, text, name, source, no, row, rec = "rec"):
     with tag("div", name="preview-container"):
@@ -620,7 +679,7 @@ def decoded(scenename):
     file.close()
     return filename
 
-def calibration(directory, scenename):
+def calibration(scenename):
     doc, tag, text = Doc().tagtext()
     doc.asis("<!DOCTYPE html>")
 
