@@ -112,8 +112,10 @@ def convert_pfms(directory):
                             pfm2png(file, savepath, str(-float(minmax[1])), str(-float(minmax[0])))
                 else:
                     print("%s does not exist!!" % (file))
-
         resize_origs(directory, scenename)
+    # for scenename in scenes:
+    #     resize_origs(directory, scenename)
+
     return scenes
 
 def read_min_max(directory):
@@ -218,6 +220,8 @@ def read_min_max(directory):
                 txt.close
 
 def resize_origs(directory, scenename):
+
+    # stereo calibration images
     PATH = directory + scenename + "/orig/calibration/stereo/"
     positions = glob.glob(PATH + "pos*")
 
@@ -229,9 +233,18 @@ def resize_origs(directory, scenename):
                 command = "convert %s -resize 400x400 %s" %(img, smallimg)
                 os.system(command)
 
+    # intrinsics calibration images
+    PATH = directory + scenename + "/orig/calibration/intrinsics/"
+    imgs = glob.glob(PATH + "*.JPG")
+    for img in imgs:
+        smallimg = img.replace(directory, "./src/pngs/")
+        if not os.path.isfile(smallimg):
+            command = "convert %s -resize 400x400 %s" %(img, smallimg)
+            os.system(command)
+
+    # ambient images
     PATH = directory + scenename + "/orig/ambient/photos/normal/"
     positions = glob.glob(PATH + "pos*")
-
     for pos in positions:
         exps = glob.glob(pos + "/exp*")
         for exp in exps:
@@ -241,6 +254,27 @@ def resize_origs(directory, scenename):
                 if not os.path.isfile(smallimg):
                     command = "convert %s -resize 400x400 %s" % (img, smallimg)
                     os.system(command)
+
+    # new ambient structures
+    PATH = directory + scenename + "/orig/ambient/photos/*/pos*/exp*.JPG"
+    imgs = glob.glob(PATH)
+    for img in imgs:
+        smallimg = img.replace(directory, "./src/pngs/")
+        if not os.path.isfile(smallimg):
+            command = "convert %s -resize 400x400 %s" % (img, smallimg)
+            os.system(command)
+
+    # scene photos
+    PATH = directory + scenename + "/scenePictures/"
+    if os.path.isdir(PATH):
+        imgs = glob.glob(PATH + "*.jpg")
+        for img in imgs:
+            smallimg = img.replace(directory, "./src/pngs/")
+            if not os.path.isfile(smallimg):
+                command = "convert %s -resize 400x400 %s" % (img, smallimg)
+                os.system(command)
+
+
 
 def pfm2png(filepath, savepath, minimum, maximum):
 
@@ -318,6 +352,9 @@ def home(directory, scenes):
                     with tag("tr"):
                         with tag("th", style="width:100px"):
                             text(scenename)
+                            descriptionpage = description(scenename,directory)
+                            with tag("a", href=descriptionpage, style="display:block"):
+                                text("description")
                             ambientpage = ambient(scenename)
                             with tag("a", href=ambientpage, style="display:block"):
                                 text("ambient")
@@ -372,9 +409,6 @@ def home(directory, scenes):
     file = open("home.html", "w")
     file.write(HTML)
     file.close()
-
-def ambient(scenename):
-    return calibration(scenename)
 
 def imageBox(doc, tag, text, name, source, no, row, rec = "rec"):
     with tag("div", name="preview-container"):
@@ -445,6 +479,116 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", reverse=False
                             id="thumb"+str(row)+str(position)+str(position+1)+str(no),
                             onmouseover="posUpdateDisp('%s', '%s')" % (str(row), str(position)+str(position+1)))
             position += 1
+
+def description(scenename,directory):
+    doc, tag, text = Doc().tagtext()
+    doc.asis("<!DOCTYPE html>")
+
+    with tag("html"):
+        with tag("head"):
+            doc.asis('<link rel="stylesheet" href="styles.css">')
+            with tag("h1"):
+                text(scenename)
+        with tag("body"):
+            with tag("h2"):
+                text("Scene Desctiption:")
+            with tag("div"):
+                try:
+                    file = open(directory+ scenename + "/sceneDescription.txt","r")
+                except:
+                    with tag("p"):
+                        text(scenename + " does not have a scene description file")
+                else:
+                    for line in file:
+                        if line == "\n":
+                            doc.stag('br')
+                        else:
+                            with tag("div"):
+                                text(line)
+            with tag("h2"):
+                text("Scene Photos:")
+            PATH = "./src/pngs/" + scenename + "/scenePictures/"
+            if os.path.isdir(PATH):
+                imgs = glob.glob(PATH + "*.jpg")
+                with tag("div", style="width:100%"):
+                    for img in imgs:
+                        with tag("div", name="view-container", style="float:left; width: 30%;padding: 5px;margin:5px"):
+                            doc.stag("img", src=img, name="views")
+            else:
+                with tag("p"):
+                    text(scenename + " does not have scene photos")
+
+
+    HTML = doc.getvalue()
+    filename= scenename + "-description.html"
+    file = open(filename, "w")
+    file.write(HTML)
+    file.close()
+    return filename
+
+
+def ambient(scenename):
+    doc, tag, text = Doc().tagtext()
+    doc.asis("<!DOCTYPE html>")
+
+    with tag("html"):
+        with tag("head"):
+            doc.asis('<link rel="stylesheet" href="styles.css">')
+            with tag("h1"):
+                text(scenename)
+        with tag("body"):
+            with tag("h2"):
+                text("Ambient photos:")
+            positions = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/L0/pos*")
+            positions.sort()
+            if positions:
+                with tag("table", style="width: 100%", border=1, frame="hsides", rules="rows"):
+                    with tag("tr"):
+                        with tag("th", style="width:30px"):
+                            text("cond")
+                        for pos in positions:
+                            with tag("th"):
+                                text(pos[pos.rfind("pos"):])
+                    dirs = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/*")
+                    dirs.sort()
+                    row = 0
+                    for dir in dirs:
+                        if os.path.isdir(dir):
+                            with tag("tr"):
+                                with tag("th", style="width:30px"):
+                                    text(dir[dir.rfind("/")+1:])
+
+                                positions = glob.glob(dir + "/pos*")
+                                positions.sort()
+                                for pos in positions:
+                                    with tag("th"):
+                                        with tag("div", name="preview-container"):
+                                            source = pos + "/exp0.JPG"
+                                            with tag("a", href = source.replace("./src/pngs/", directory)):
+                                                doc.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
+                                            with tag("div", name="caption-container"+str(row), klass = "caption-container"):
+                                                text("exp0")
+                                            exps = glob.glob(pos+"/exp*.JPG")
+                                            exps.sort()
+                                            expnum = 0
+                                            for exp in exps:
+                                                with tag("div", name="thumbnail-container"):
+                                                    with tag("a", href = exp.replace("./src/pngs/", directory)):
+                                                        doc.stag("img", src=exp, name="thumbnail",
+                                                        id="thumb"+str(row)+str(expnum),
+                                                        onmouseover= "expChange(%s, %s)" %(str(expnum),str(row)))
+                                                expnum += 1
+                            row += 1
+        doc.asis('<script type="text/javascript" src="master.js"></script>')
+
+
+    HTML = doc.getvalue()
+    filename= scenename + "-ambient.html"
+    file = open(filename, "w")
+    file.write(HTML)
+    file.close()
+    return filename
+
 
 def disparity(scenename, xy):
     doc, tag, text = Doc().tagtext()
@@ -527,10 +671,11 @@ def disparity(scenename, xy):
                                             for i in projlist:
                                                 source = sublist[0]
                                                 imgtag = source[source.rfind("pos0/")+5:]
+                                                # print(imgtag)
                                                 img = i + "/pos0/" + imgtag
                                                 proj = i[i.rfind("proj"):]
                                                 with tag("div", name="thumbnail-container-vertical"):
-                                                    with tag("a", href = img.replace("-400.jpg", "-jet.png")):
+                                                    with tag("a", href = img.replace("-400.jpg", ".png")):
                                                         doc.stag("img", src=img, name=rec, id="proj"+str(proj[-1]),
                                                         onmouseover = "projChange(%s, %s)" % (proj[-1], str(row)))
 
@@ -718,6 +863,16 @@ def calibration(scenename):
                                         doc.stag("img", src=img, name="thumbnail", id="thumb"+str(position)+str(no), onmouseover="changeView("+str(num_views)+","+str(no)+")")
                                 no = no + 1
                         position = position + 1
+
+            with tag("h2"):
+                text("Intrinsics calibration photos")
+            PATH = "./src/pngs/" + scenename + "/orig/calibration/intrinsics/"
+            imgs = glob.glob(PATH + "*.JPG")
+            with tag("div", style="width:100%"):
+                for img in imgs:
+                    with tag("div", name="view-container", style="float:left; width: 30%;padding: 5px;margin:5px"):
+                        doc.stag("img", src=img)
+
             doc.asis('<script type="text/javascript" src="master.js"></script>')
 
     HTML = doc.getvalue()

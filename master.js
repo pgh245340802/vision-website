@@ -72,6 +72,19 @@ function projChange(value, row) {
     }
 }
 
+function expChange(value, row) {
+    var captions = document.getElementsByName("caption-container"+row)
+    for (var i=0; i<captions.length; i++) {
+        captions[i].innerHTML = "exp" + value
+    }
+    var images = document.getElementsByClassName("row"+row)
+    for (var i=0; i<images.length; i++) {
+        var source = images[i].src
+        source = source.replace(/exp[0-9]/, "exp"+value)
+        images[i].src = source
+    }
+}
+
 function hideAndShow(hide,show) {
     var images = document.getElementsByClassName(hide)
     for (var i=0; i<images.length; i++) {
