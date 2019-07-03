@@ -46,6 +46,7 @@ div[name=preview-container] {
     display: block;
     max-height: 600px;
     max-width: 600px;
+    margin: 5px;
 }
 
 .caption-container {

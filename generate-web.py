@@ -414,9 +414,10 @@ def imageBox(doc, tag, text, name, source, no, row, rec = "rec"):
     with tag("div", name="preview-container"):
         with tag("p", name="imgtext"+str(row), klass="imgtext"):
             text(source[source.rfind("/")+1:])
-        with tag("a", href = source.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
-            class1 = "row"+str(row)+" "
-            doc.stag("img", src=source, klass=class1 + rec, id= name, name=str(row), style="display:block")
+        with tag("div", name="image-container"+str(row)):
+            with tag("a", href = source.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
+                class1 = "row"+str(row)+" "
+                doc.stag("img", src=source, klass=class1 + rec, id= name, name=str(row), style="display:block")
         pospath = source[:source.rfind("pos0/") + 3] + "*"
         positions = glob.glob(pospath)
         positions.sort()
@@ -439,9 +440,10 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", reverse=False
     with tag("div", name="preview-container"):
         with tag("p", name="imgtext"+str(row), klass="imgtext"):
             text(source[source.rfind("/")+1:])
-        with tag("a", href = source.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
-            class1 = "row"+str(row)+" "
-            doc.stag("img", src=source, klass=class1 + rec, id=name, name=str(row), style="display:block")
+        with tag("div", name="image-container"+str(row)):
+            with tag("a", href = source.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
+                class1 = "row"+str(row)+" "
+                doc.stag("img", src=source, klass=class1 + rec, id=name, name=str(row), style="display:block")
         pospath = source[:source.rfind("pos") + 3] + "*"
         positions = glob.glob(pospath)
         positions.sort()
@@ -542,7 +544,7 @@ def ambient(scenename):
             positions = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/L0/pos*")
             positions.sort()
             if positions:
-                with tag("table", style="width: 100%", border=1, frame="hsides", rules="rows"):
+                with tag("table", cellpadding = "-10", cellspacing = "-10", border=1, frame="hsides", rules="rows", style="margin:5px"):
                     with tag("tr"):
                         with tag("th", style="width:30px"):
                             text("cond")
@@ -563,9 +565,9 @@ def ambient(scenename):
                                 for pos in positions:
                                     with tag("th"):
                                         with tag("div", name="preview-container"):
+
                                             source = pos + "/exp0.JPG"
-                                            with tag("a", href = source.replace("./src/pngs/", directory)):
-                                                doc.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
+                                            doc.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
                                             with tag("div", name="caption-container"+str(row), klass = "caption-container"):
                                                 text("exp0")
                                             exps = glob.glob(pos+"/exp*.JPG")
@@ -579,8 +581,10 @@ def ambient(scenename):
                                                         onmouseover= "expChange(%s, %s)" %(str(expnum),str(row)))
                                                 expnum += 1
                             row += 1
+            else:
+                with tag("p"):
+                    text(scenename + " does not have the latest ambient photo directory")
         doc.asis('<script type="text/javascript" src="master.js"></script>')
-
 
     HTML = doc.getvalue()
     filename= scenename + "-ambient.html"
@@ -868,7 +872,7 @@ def calibration(scenename):
                 text("Intrinsics calibration photos")
             PATH = "./src/pngs/" + scenename + "/orig/calibration/intrinsics/"
             imgs = glob.glob(PATH + "*.JPG")
-            with tag("div", style="width:100%"):
+            with tag("div", style="width:90%"):
                 for img in imgs:
                     with tag("div", name="view-container", style="float:left; width: 30%;padding: 5px;margin:5px"):
                         doc.stag("img", src=img)
