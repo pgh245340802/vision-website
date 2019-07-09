@@ -4,6 +4,7 @@ import sys
 import subprocess
 import glob
 
+SCENES_DIRECTORY = "./src/scenes/"
 UTILSPATH = "/home/gpan/public_html/2019_summer_research/utils2/"
 UNRECTIFIED = ["/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-0initial.pfm",
 "/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-4refined2.pfm",
@@ -994,13 +995,19 @@ def calibration(scenename):
     return filename
 
 if __name__ == "__main__":
-    if not os.path.isdir('./src'):
-        print("Creating folder structures..")
-        command = "mkdir ./src && mkdir ./src/pngs && mkdir ./src/scenes"
-        os.system(command)
-        print("Put your scene folder in ./src/scenes, then run: python3 generate-web.py")
+    if(len(sys.argv)==2 and sys.argv[1] == "init"):
+        if not os.path.isdir('./src'):
+            print("Creating folder structures..")
+            command = "mkdir ./src && mkdir ./src/pngs && mkdir ./src/scenes"
+            os.system(command)
+            print("Put your scene folder in ./src/scenes, then run: python3 generate-web.py")
+        else:
+            print("You already have a src folder. Put your scene folder in ./src/scenes, then run: python3 generate-web.py")
     else:
-        directory = "./src/scenes/"
-        read_min_max(directory)
-        scenes = convert_pfms(directory)
-        home(directory, scenes)
+        if os.path.isdir('./src'):
+            read_min_max(SCENES_DIRECTORY)
+            scenes = convert_pfms(SCENES_DIRECTORY)
+            home(SCENES_DIRECTORY, scenes)
+        else:
+            print("Make sure you have the necessary directory structure for the program to run.")
+            print("In order to generate the necessary structure, run: python3 generate-web.py init")
