@@ -1,5 +1,3 @@
-
-
 function changeView(pos, img) {
     var i;
     for (i = 0; i < pos; i ++){
@@ -38,11 +36,12 @@ function posUpdate(name, pos) {
 
 }
 
-function posUpdateDisp(name, pos, disparity = false, rec = 'rec') {
+function posUpdateDisp(name, pos) {
     var captions = document.getElementsByName("caption-container"+name)
     var images = document.getElementsByName(name)
     var links = document.getElementsByName("imglink"+name)
     var texts = document.getElementsByName("imgtext"+name)
+
     for (var i = 0; i < captions.length; i++){
         if (i == 1){
             pos = pos[1] + pos[0]
@@ -58,24 +57,9 @@ function posUpdateDisp(name, pos, disparity = false, rec = 'rec') {
         newname = newname.substring(newname.lastIndexOf("/")+1,)
         texts[i].innerHTML = newname
     }
-
-    if(disparity){
-      var minmax = document.getElementsByName("minmaxx"+name).length > 0? document.getElementsByName("minmaxx"+name):document.getElementsByName("minmaxy"+name)
-      var newminmax = document.getElementsByName("maxmin-"+rec+"-pos"+pos.slice(1, 2))[0].innerText
-
-      for (var i = 0; i < minmax.length; i++){
-        if(i == 1){
-          negated = []
-          negated.push(-parseFloat(newminmax.split(",")[0].replace(/^\s+|\s+$|^\[+|\]+$/gm,'')))
-          negated.push(-parseFloat(newminmax.split(",")[1].replace(/^\s+|\s+$|^\[+|\]+$/gm,'')))
-          newminmax = "[" + negated.join() + "]"
-        }
-        minmax[i].innerHTML = newminmax
-      }
-    }
 }
 
-function projChange(value, row, decoded = false) {
+function projChange(value, row) {
     var captions = document.getElementsByName("projnum-container"+row)
     for (var i=0; i<captions.length; i++) {
         captions[i].innerHTML = "proj" + value
@@ -85,13 +69,6 @@ function projChange(value, row, decoded = false) {
         var source = images[i].src
         source = source.replace(/proj[0-9]/, "proj"+value)
         images[i].src = source
-    }
-
-    if(decoded){
-      var minmax_u = document.getElementsByName("minmaxu"+row)
-      minmax_u[0].innerHTML = document.getElementsByName("maxmin-u"+value)[0].innerText
-      var minmax_v = document.getElementsByName("minmaxv"+row)
-      minmax_v[0].innerHTML = document.getElementsByName("maxmin-v"+value)[0].innerText
     }
 }
 
