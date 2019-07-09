@@ -356,7 +356,7 @@ def home(directory, scenes):
                             descriptionpage = description(scenename,directory)
                             with tag("a", href=descriptionpage, style="display:block"):
                                 text("description")
-                            ambientpage = ambient(scenename)
+                            ambientpage = ambient(scenename,directory)
                             with tag("a", href=ambientpage, style="display:block"):
                                 text("ambient")
                             decodedpage = decoded(scenename)
@@ -553,7 +553,7 @@ def description(scenename,directory):
     return filename
 
 
-def ambient(scenename):
+def ambient(scenename,directory):
     doc, tag, text = Doc().tagtext()
     doc.asis("<!DOCTYPE html>")
 
