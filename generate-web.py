@@ -182,7 +182,7 @@ def read_min_max(directory):
                 txt.write(truemax+"\n")
                 txt.close
 
-        # -------------------------------------UNRECTIFIED DISPARITY-------------------
+        # -------------------------------------RECTIFIED DISPARITY-------------------
         for i in ["x", "y"]:
             if i == "x":
                 path = directory + scenename + "/computed/merged2"
@@ -358,13 +358,13 @@ def home(directory, scenes):
                             ambientpage = ambient(scenename)
                             with tag("a", href=ambientpage, style="display:block"):
                                 text("ambient")
-                            decodedpage = decoded(scenename)
+                            decodedpage = decoded(scenename,directory)
                             with tag("a", href=decodedpage, style="display:block"):
                                 text("decoded")
-                            xdisparity = disparity(scenename, "x")
+                            xdisparity = disparity(directory,scenename, "x")
                             with tag("a", href=xdisparity, style="display:block"):
                                 text("X disparity")
-                            ydisparity = disparity(scenename, "y")
+                            ydisparity = disparity(directory,scenename, "y")
                             with tag("a", href=ydisparity, style="display:block"):
                                 text("Y disparity")
                             calibpage = calibration(scenename)
@@ -418,7 +418,7 @@ def home(directory, scenes):
 
                         with tag("th"):
                             source = "./src/pngs/%s/computed/merged2/pos0/disp01x-4crosscheck2-jet-400.jpg" % (scenename)
-                            imageBoxDual(home, tag, text, "x"+str(row), source, 1, row)                            # imageBoxDual(home, tag, text, "u"+str(row), source, 1, row)
+                            imageBoxDual(home, tag, text, "x"+str(row), source, 1, row)
 
                         with tag("th"):
                             source = "./src/pngs/%s/computed/merged2/pos1/disp01x-4crosscheck2-jet-400.jpg" % (scenename)
@@ -433,10 +433,12 @@ def home(directory, scenes):
     file.write(HTML)
     file.close()
 
-def imageBox(doc, tag, text, name, source, no, row, rec = "rec"):
+def imageBox(doc, tag, text, name, source, no, row, minmax, rec = "rec"):
     with tag("div", name="preview-container"):
         with tag("p", name="imgtext"+str(row), klass="imgtext"):
             text(source[source.rfind("/")+1:])
+        with tag("small", name="minmax"+name, klass="minmax"):
+            text(minmax)
         with tag("div", name="image-container"+str(row)):
             with tag("a", href = source.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
                 class1 = "row"+str(row)+" "
@@ -459,10 +461,17 @@ def imageBox(doc, tag, text, name, source, no, row, rec = "rec"):
                     onmouseover="posUpdate('%s', %s)" % (str(row), str(position)))
             position += 1
 
-def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", reverse=False):
+def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", minmax = None,disparity = False, reverse=False):
+    if disparity:
+        disp_bool = "true"
+    else:
+        disp_bool = "false"
     with tag("div", name="preview-container"):
         with tag("p", name="imgtext"+str(row), klass="imgtext"):
             text(source[source.rfind("/")+1:])
+        if(minmax):
+            with tag("small", name="minmax"+name, klass="minmax"):
+                text(minmax)
         with tag("div", name="image-container"+str(row)):
             with tag("a", href = source.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
                 class1 = "row"+str(row)+" "
@@ -493,7 +502,7 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", reverse=False
                             with tag("a", href = img.replace("-400.jpg", ".png"), klass="imglink"):
                                 doc.stag("img", src=img, klass=class1 + rec,
                                 id="thumb"+str(row)+str(position)+str(position-1)+str(no),
-                                onmouseover="posUpdateDisp('%s', '%s')" % (str(row), str(position-1)+str(position)))
+                                onmouseover="posUpdateDisp('%s', '%s', %s, '%s')" % (str(row), str(position-1)+str(position),disp_bool,rec))
 
             else:
                 img = "%s/%s%s%s%s-jet-400.jpg" % (pos, tag1, str(position)+str(position+1), name[0],tag2)
@@ -502,7 +511,7 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", reverse=False
                         with tag("a", href = img.replace("-400.jpg", ".png"), klass="imglink"):
                             doc.stag("img", src=img, klass=class1 + rec,
                             id="thumb"+str(row)+str(position)+str(position+1)+str(no),
-                            onmouseover="posUpdateDisp('%s', '%s')" % (str(row), str(position)+str(position+1)))
+                            onmouseover="posUpdateDisp('%s', '%s', %s, '%s')" % (str(row), str(position)+str(position+1),disp_bool,rec))
             position += 1
 
 def description(scenename,directory):
@@ -625,7 +634,7 @@ def ambient(scenename):
     return filename
 
 
-def disparity(scenename, xy):
+def disparity(directory, scenename, xy):
     doc, tag, text = Doc().tagtext()
     doc.asis("<!DOCTYPE html>")
 
@@ -673,6 +682,36 @@ def disparity(scenename, xy):
                         for file in sublist:
                             if os.path.isfile(file):
                                 doc.stag("img", href = file, klass = "line-img")
+            with tag("div", name = "range-container", style="display:none"):
+                if(xy == "x"):
+                    path = directory + scenename + "/computed/merged2"
+                else:
+                    path = directory + scenename + "/computed/merged/rectified"
+                posnum = len(glob.glob(path+"/pos*"))
+                for pos_num in range(posnum-1):
+                    try:
+                        file = open(path + "/pos" + str(pos_num) + "/minmax-%s.txt"%(xy), "r")
+                    except:
+                        print(path + "/pos" + str(pos_num) + "/minmax-%s.txt does not exist!"%(xy))
+                    else:
+                        minmax = [float(x) for x in file.read().split()]
+                        if minmax[0] < 0:
+                            minmax[0],minmax[1] = minmax[1],minmax[0]
+                        with tag("div", name = "maxmin-rec-pos"+str(pos_num), style="display:none"):
+                            text(str(minmax))
+                path = directory + scenename + "/computed/disparity/unrectified/proj0"
+                posnum = len(glob.glob(path+"/pos*"))
+                for pos_num in range(posnum-1):
+                    try:
+                        file = open(path + "/pos" + str(pos_num) + "/minmax-%s.txt"%(xy), "r")
+                    except:
+                        print(path + "/pos" + str(pos_num) + "/minmax-%s.txt does not exist!"%(xy))
+                    else:
+                        minmax = [float(x) for x in file.read().split()]
+                        if minmax[0] < 0:
+                            minmax[0],minmax[1] = minmax[1],minmax[0]
+                        with tag("div", name = "maxmin-unrec-pos"+str(pos_num), style="display:none"):
+                            text(str(minmax))
 
             with tag("table", cellpadding = "-10", cellspacing = "-10", border=1, frame="hsides", rules="rows"):
                 with tag("tr", klass = "space"):
@@ -715,14 +754,31 @@ def disparity(scenename, xy):
                                                         onmouseover = "projChange(%s, %s)" % (proj[-1], str(row)))
 
                                 if os.path.isfile(source):
+                                    if(rec == "rec"):
+                                        if(xy == "x"):
+                                            path = directory + scenename + "/computed/merged2/pos0"
+                                        else:
+                                            path = directory + scenename + "/computed/merged/rectified/pos0"
+                                    else:
+                                        path = directory + scenename + "/computed/disparity/unrectified/proj0/pos0"
+                                    try:
+                                        file = open(path + "/minmax-%s.txt"%(xy), "r")
+                                    except:
+                                        print(path + "/minmax-%s.txt does not exist!"%(xy))
+                                    else:
+                                        minmax = [float(x) for x in file.read().split()]
+                                        if minmax[0] < 0:
+                                            minmax[0],minmax[1] = minmax[1],minmax[0]
+
                                     with tag("th", klass = "imgbox-container"):
                                         source = sublist[0].replace("01x", "01"+xy)
-                                        imageBoxDual(doc, tag, text, xy+str(row), source, 1, row, rec)
+                                        imageBoxDual(doc, tag, text, xy+str(row), source, 1, row, rec, minmax = str(minmax), disparity = True)
 
                                 source = source.replace("pos0", "pos1")
                                 if os.path.isfile(source):
+                                    minmax = [-x for x in minmax]
                                     with tag("th", klass = "imgbox-container"):
-                                        imageBoxDual(doc, tag, text, xy+str(row), source, 2, row, rec, reverse=True)
+                                        imageBoxDual(doc, tag, text, xy+str(row), source, 2, row, rec, minmax = str(minmax), disparity = True, reverse=True)
                             row += 1
 
             doc.asis('<script type="text/javascript" src="master.js"></script>')
@@ -734,7 +790,7 @@ def disparity(scenename, xy):
     file.close()
     return filename
 
-def decoded(scenename):
+def decoded(scenename,directory):
     doc, tag, text = Doc().tagtext()
     doc.asis("<!DOCTYPE html>")
 
@@ -783,14 +839,39 @@ def decoded(scenename):
                             if os.path.isfile(file):
                                 doc.stag("img", href = file, klass = "line-img")
 
+            with tag("div", name = "range-container", style="display:none"):
+                PATH= directory + scenename + "/computed/decoded/unrectified/proj*"
+                projs = glob.glob(PATH)
+                projs.sort()
+                for proj in projs:
+                    try:
+                        range_u = open(proj + "/minmax-u.txt", "r")
+                    except:
+                        print(proj + "/minmax-u.txt does not exist!")
+                    else:
+                        proj_num = proj[-1]
+                        minmax_u = [float(x) for x in range_u.read().split()]
+                        with tag("div", name = "maxmin-u"+proj_num, style="display:none"):
+                            text(str(minmax_u))
+
+                    try:
+                        range_v = open(proj + "/minmax-v.txt", "r")
+                    except:
+                        print(proj + "/minmax-v.txt does not exist!")
+                    else:
+                        proj_num = proj[-1]
+                        minmax_v = [float(x) for x in range_v.read().split()]
+                        with tag("div", name = "maxmin-v"+proj_num, style="display:none"):
+                            text(str(minmax_v))
+
             with tag("table", cellpadding = "-10", cellspacing = "-10", border=1, frame="hsides", rules="rows"):
                 with tag("tr", klass = "space"):
                     with tag("th", klass = "proj"):
                         text("proj")
                     with tag("th", klass = "imgbox-container"):
-                        text("u/x")
+                        text("u")
                     with tag("th", klass = "imgbox-container"):
-                        text("v/y")
+                        text("v")
                 row = 0
 
                 for LIST in [UNRECTIFIED[:2], RECTIFIED[:2]]:
@@ -802,7 +883,6 @@ def decoded(scenename):
                         filename= "./src/pngs/" + scenename + file.replace(".pfm", "-jet-400.jpg")
                         sublist = glob.glob(filename)
                         sublist.sort()
-                        print(sublist)
                         if sublist != []:
                             with tag("tr", klass=rec):
 
@@ -820,35 +900,29 @@ def decoded(scenename):
                                             with tag("div", name="thumbnail-container-vertical"):
                                                 with tag("a", href = img.replace("-400.jpg", ".png")):
                                                     doc.stag("img", src=img, name=rec, id="proj"+str(proj[-1]),
-                                                    onmouseover = "projChange(%s, %s)" % (proj[-1], str(row)))
+                                                    onmouseover = "projChange(%s, %s, true)" % (proj[-1], str(row)))
 
 
 
                                 with tag("th", klass = "imgbox-container"):
                                     source = sublist[0]
-                                    if "[u,v]" in file:
-                                        if "[0-9][0-9]" not in file:
-                                            imageBox(doc, tag, text, "u"+str(row), source, 1, row, rec)
-                                        else:
-                                            imageBoxDual(doc, tag, text, "u"+str(row), source, 1, row, rec)
+                                    range_u = open(directory + scenename + "/computed/decoded/unrectified/proj0/minmax-u.txt", "r")
+                                    minmax_u = [float(x) for x in range_u.read().split()]
+                                    if "[0-9][0-9]" not in file:
+                                        imageBox(doc, tag, text, "u"+str(row), source, 1, row, str(minmax_u), rec)
                                     else:
-                                        if "[0-9][0-9]" not in file:
-                                            imageBox(doc, tag, text, "x"+str(row), source, 1, row, rec)
-                                        else:
-                                            imageBoxDual(doc, tag, text, "x"+str(row), source, 1, row, rec)
+                                        imageBoxDual(doc, tag, text, "u"+str(row), source, 1, row, rec, str(minmax_u))
 
                                 with tag("th", klass = "imgbox-container"):
                                     source = sublist[1]
-                                    if "[u,v]" in file:
-                                        if "[0-9][0-9]" not in file:
-                                            imageBox(doc, tag, text, "v"+str(row), source, 2, row, rec)
-                                        else:
-                                            imageBoxDual(doc, tag, text, "v"+str(row), source, 2, row, rec, reverse=True)
-                                    elif "[x,y]" in file:
-                                        if "[0-9][0-9]" not in file:
-                                            imageBox(doc, tag, text, "y"+str(row), source, 2, row, rec)
-                                        else:
-                                            imageBoxDual(doc, tag, text, "y"+str(row), source, 2, row, rec, reverse=True)
+                                    range_v = open(directory + scenename + "/computed/decoded/unrectified/proj0/minmax-v.txt", "r")
+                                    minmax_v = [float(x) for x in range_v.read().split()]
+                                    if "[0-9][0-9]" not in file:
+                                        imageBox(doc, tag, text, "v"+str(row), source, 2, row, str(minmax_v), rec)
+                                    else:
+                                        source = source.replace("pos0", "pos1")
+                                        imageBoxDual(doc, tag, text, "v"+str(row), source, 2, row, rec, str(minmax_v), reverse=True)
+
                             row += 1
 
             doc.asis('<script type="text/javascript" src="master.js"></script>')
