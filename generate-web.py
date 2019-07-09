@@ -564,6 +564,14 @@ def ambient(scenename):
         with tag("body"):
             with tag("h2"):
                 text("Ambient photos:")
+            with tag("h3"):
+                text("Description:")
+            with tag("p"):
+                text("""This webpage displays all the ambient photos taken under different lighting conditions.
+                Below each main image, mouse over the previews to see different exposures.
+                L1, L2, L3...refers to different lighting conditions.
+                T1, T2...means torch mode was used.
+                F1, F2... means flash mode was used""")
             positions = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/L0/pos*")
             positions.sort()
             if positions:
@@ -628,7 +636,7 @@ def disparity(scenename, xy):
                 text(scenename)
         with tag("body"):
             with tag("h2"):
-                text("Scene photos")
+                text("Disparity %s photos"%(xy))
             with tag("h3"):
                 text("Description:")
             with tag("p"):
@@ -737,7 +745,7 @@ def decoded(scenename):
                 text(scenename)
         with tag("body"):
             with tag("h2"):
-                text("Scene photos")
+                text("Decoded photos")
             with tag("h3"):
                 text("Description:")
             with tag("p"):
@@ -794,6 +802,7 @@ def decoded(scenename):
                         filename= "./src/pngs/" + scenename + file.replace(".pfm", "-jet-400.jpg")
                         sublist = glob.glob(filename)
                         sublist.sort()
+                        print(sublist)
                         if sublist != []:
                             with tag("tr", klass=rec):
 
@@ -895,6 +904,7 @@ def calibration(scenename):
                 text("Intrinsics calibration photos")
             PATH = "./src/pngs/" + scenename + "/orig/calibration/intrinsics/"
             imgs = glob.glob(PATH + "*.JPG")
+            imgs.sort();
             with tag("div", style="width:90%"):
                 for img in imgs:
                     with tag("div", name="view-container", style="float:left; width: 30%;padding: 5px;margin:5px"):
