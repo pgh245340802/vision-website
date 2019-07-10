@@ -695,7 +695,7 @@ def disparity(directory, scenename, xy):
                     except:
                         print(path + "/pos" + str(pos_num) + "/minmax-%s.txt does not exist!"%(xy))
                     else:
-                        minmax = [float(x) for x in file.read().split()]
+                        minmax = [round(float(x),1) for x in file.read().split()]
                         if minmax[0] < 0:
                             minmax[0],minmax[1] = minmax[1],minmax[0]
                         with tag("div", name = "maxmin-rec-pos"+str(pos_num), style="display:none"):
@@ -767,7 +767,7 @@ def disparity(directory, scenename, xy):
                                     except:
                                         print(path + "/minmax-%s.txt does not exist!"%(xy))
                                     else:
-                                        minmax = [float(x) for x in file.read().split()]
+                                        minmax = [round(float(x),1) for x in file.read().split()]
                                         if minmax[0] < 0:
                                             minmax[0],minmax[1] = minmax[1],minmax[0]
 
