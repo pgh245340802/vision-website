@@ -646,7 +646,7 @@ def ambient(scenename,directory):
                                         exps.sort()
                                         expnum = 0
                                     for exp in exps:
-                                        with tag("div", name="thumbnail-container"):
+                                        with tag("div", name="thumbnail-container-vertical"):
                                             with tag("a", href = exp.replace("./src/pngs/", directory)):
                                                 doc.stag("img", src=exp, name="thumbnail",
                                                          id="thumb"+str(row)+str(expnum),
