@@ -400,47 +400,48 @@ def home(directory, scenes):
 
                         with tag("th"):
                             # --------------------------ORIGINAL--------------------------------
-                            # hardcoded, remove later
-                            if(row<4):
-                                with tag("div", name="preview-container"):
-                                    source = "%s%s/orig/ambient/photos/normal/pos0/exp1/IMG1.JPG" % ("./src/pngs/", scenename)
-                                    with tag("a", href = source.replace("./src/pngs/", directory)):
-                                        home.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
-                                    pospath = "%s%s/orig/ambient/photos/normal/pos*" % ("./src/pngs/", scenename)
-                                    positions = glob.glob(pospath)
-                                    positions.sort()
-                                    position = 0
-                                    with tag("div", name="caption-container-home"+str(row), klass = "caption-container"):
-                                        text("pos"+str(position))
-                                    for pos in positions:
-                                        no = 0
-                                        with tag("div", name="thumbnail-container"):
-                                            img = "%s/exp1/IMG1.JPG" % (pos)
-                                            with tag("a", href = img.replace("./src/pngs/", directory)):
-                                                home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
-                                                id="thumb"+str(row)+str(position)+str(no),
-                                                onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
-                                        position += 1
-                            else:
-                                with tag("div", name="preview-container"):
-                                    source = "%s%s/orig/ambient/photos/L0/pos0/exp0.JPG" % ("./src/pngs/", scenename)
-                                    with tag("a", href = source.replace("./src/pngs/", directory)):
-                                        home.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
-                                    pospath = "%s%s/orig/ambient/photos/L0/pos*" % ("./src/pngs/", scenename)
-                                    positions = glob.glob(pospath)
-                                    positions.sort()
-                                    position = 0
-                                    with tag("div", name="caption-container-home"+str(row), klass = "caption-container"):
-                                        text("pos"+str(position))
-                                    for pos in positions:
-                                        no = 0
-                                        with tag("div", name="thumbnail-container"):
-                                            img = "%s/exp0.JPG" % (pos)
-                                            with tag("a", href = img.replace("./src/pngs/", directory)):
-                                                home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
-                                                id="thumb"+str(row)+str(position)+str(no),
-                                                onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
-                                        position += 1
+                            # this is the ambient code for old folder structure
+                            # if(row<4):
+                            #     with tag("div", name="preview-container"):
+                            #         source = "%s%s/orig/ambient/photos/normal/pos0/exp1/IMG1.JPG" % ("./src/pngs/", scenename)
+                            #         with tag("a", href = source.replace("./src/pngs/", directory)):
+                            #             home.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
+                            #         pospath = "%s%s/orig/ambient/photos/normal/pos*" % ("./src/pngs/", scenename)
+                            #         positions = glob.glob(pospath)
+                            #         positions.sort()
+                            #         position = 0
+                            #         with tag("div", name="caption-container-home"+str(row), klass = "caption-container"):
+                            #             text("pos"+str(position))
+                            #         for pos in positions:
+                            #             no = 0
+                            #             with tag("div", name="thumbnail-container"):
+                            #                 img = "%s/exp1/IMG1.JPG" % (pos)
+                            #                 with tag("a", href = img.replace("./src/pngs/", directory)):
+                            #                     home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
+                            #                     id="thumb"+str(row)+str(position)+str(no),
+                            #                     onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
+                            #             position += 1
+                            # else:
+                            
+                            with tag("div", name="preview-container"):
+                                source = "%s%s/orig/ambient/photos/L0/pos0/exp0.JPG" % ("./src/pngs/", scenename)
+                                with tag("a", href = source.replace("./src/pngs/", directory)):
+                                    home.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
+                                pospath = "%s%s/orig/ambient/photos/L0/pos*" % ("./src/pngs/", scenename)
+                                positions = glob.glob(pospath)
+                                positions.sort()
+                                position = 0
+                                with tag("div", name="caption-container-home"+str(row), klass = "caption-container"):
+                                    text("pos"+str(position))
+                                for pos in positions:
+                                    no = 0
+                                    with tag("div", name="thumbnail-container"):
+                                        img = "%s/exp0.JPG" % (pos)
+                                        with tag("a", href = img.replace("./src/pngs/", directory)):
+                                            home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
+                                            id="thumb"+str(row)+str(position)+str(no),
+                                            onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
+                                    position += 1
 
 
                         with tag("th"):
@@ -616,9 +617,17 @@ def ambient(scenename,directory):
             positions = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/L0/pos*")
             positions.sort()
             if positions:
-                with tag("table", cellpadding = "-10", cellspacing = "-10", border=1, frame="hsides", rules="rows", style="margin:5px"):
+                
+                with tag("div", name = "button-area", style="margin:10px"):
+                    with tag("button", onclick = "hideAndShow('rec','unrec')"):
+                        text("Show Unrectified Ambient Images")
+                    with tag("button", onclick = "hideAndShow('unrec','rec')"):
+                        text("Show Rectified Ambient Images")
+
+                # unrectified ambient images table
+                with tag("table", cellpadding = "-10", cellspacing = "-10", border=1, frame="hsides", rules="rows", style="margin:5px", klass = "unrec"):
                     with tag("tr"):
-                        with tag("th", style="width:30px"):
+                        with tag("th", style="max-width:30px"):
                             text("cond")
                         for pos in positions:
                             with tag("th"):
@@ -631,6 +640,18 @@ def ambient(scenename,directory):
                             with tag("tr"):
                                 with tag("th", style="width:30px"):
                                     text(dir[dir.rfind("/")+1:])
+                                    with tag("div", name="caption-container"+str(row), klass = "caption-container"):
+                                        text("exp0")
+                                        exps = glob.glob(dir + "/pos0/exp*.JPG")
+                                        exps.sort()
+                                        expnum = 0
+                                    for exp in exps:
+                                        with tag("div", name="thumbnail-container"):
+                                            with tag("a", href = exp.replace("./src/pngs/", directory)):
+                                                doc.stag("img", src=exp, name="thumbnail",
+                                                         id="thumb"+str(row)+str(expnum),
+                                                         onmouseover= "expChange(%s, %s)" %(str(expnum),str(row)))
+                                                expnum += 1
 
                                 positions = glob.glob(dir + "/pos*")
                                 positions.sort()
@@ -639,41 +660,60 @@ def ambient(scenename,directory):
                                         with tag("div", name="preview-container"):
 
                                             source = pos + "/exp0.JPG"
-                                            doc.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
-                                            with tag("div", name="caption-container"+str(row), klass = "caption-container"):
-                                                text("exp0")
-                                            exps = glob.glob(pos+"/exp*.JPG")
-                                            exps.sort()
-                                            expnum = 0
-                                            for exp in exps:
-                                                with tag("div", name="thumbnail-container"):
-                                                    with tag("a", href = exp.replace("./src/pngs/", directory)):
-                                                        doc.stag("img", src=exp, name="thumbnail",
-                                                        id="thumb"+str(row)+str(expnum),
-                                                        onmouseover= "expChange(%s, %s)" %(str(expnum),str(row)))
-                                                expnum += 1
+                                            doc.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block",
+                                                     onmouseover="swapBall(this)", onmouseout="restoreBall(this)")
                                             
-                                            
-                                            # Thumbnail for ambient balls
-                                            index = pos.find('ambient') + 7
-                                            pos = pos[:index] + 'Ball' + pos[index:]
-                                            print(pos)
-                                            if os.path.isdir(pos):
-                                                doc.stag('br')
-                                                with tag("div", name="ball-caption-container"+str(row), klass = "caption-container"):
-                                                    text("ball")
-                                                exps = glob.glob(pos+"/exp*.JPG")
-                                                exps.sort()
-                                                expnum = 0
-                                                for exp in exps:
-                                                    with tag("div", name="thumbnail-container"):
-                                                        with tag("a", href = exp.replace("./src/pngs/", directory)):
-                                                            doc.stag("img", src=exp, name="thumbnail",
-                                                                     id="thumb"+str(row)+str(expnum),
-                                                                     onmouseover= "expChange(%s, %s, true)" %(str(expnum),str(row)))
-                                                    expnum += 1
-                                            
+                                                                                   
                             row += 1
+
+                # rectified ambient images table
+                with tag("table", cellpadding = "-10", cellspacing = "-10", border=1, frame="hsides", rules="rows",
+                         style="margin:5px; display:none", klass = "rec"):
+                    with tag("tr"):
+                        with tag("th", style="max-width:30px"):
+                            text("cond")
+                        with tag("th"):
+                            text("pos01")
+                        with tag("th"):
+                            text("pos10")
+                    dirs = glob.glob("./src/pngs/" + scenename + "/computed/ambient/rectified/*")
+                    dirs.sort()
+                    row = 0
+                    for dir in dirs:
+                        if os.path.isdir(dir):
+                            with tag("tr"):
+                                with tag("th", style="width:30px"):
+                                    text(dir[dir.rfind("/")+1:])
+                                    with tag("div", name="caption-container"+str(row), klass = "caption-container"):
+                                        text("exp0")
+                                        exps = glob.glob(dir + "/pos0/*exp*.png")
+                                        exps.sort()
+                                        expnum = 0
+                                    for exp in exps:
+                                        with tag("div", name="thumbnail-container"):
+                                            with tag("a", href = exp.replace("./src/pngs/", directory)):
+                                                doc.stag("img", src=exp, name="thumbnail",
+                                                         id="thumb"+str(row)+str(expnum),
+                                                         onmouseover= "expChange(%s, %s)" %(str(expnum),str(row)))
+                                                expnum += 1
+                                
+                                with tag("th", klass="imgbox-container"):
+                                    source = dir + "/pos0/01rectified-exp0.png"
+                                    with tag("div", name="preview-container"):
+                                        with tag("div", name="image-container"+str(row)):
+                                            doc.stag("img", src=source, klass="row"+str(row), name=str(row), style="display:block",
+                                                         onmouseover="swap(this,%s)"%("false"), onmouseout="restore(this,%s)"%("false"))
+
+                                with tag("th", klass="imgbox-container"):
+                                    source = dir + "/pos1/01rectified-exp0.png"
+                                    with tag("div", name="preview-container"):
+                                        with tag("div", name="image-container"+str(row)):
+                                            doc.stag("img", src=source, klass="row"+str(row), name=str(row), style="display:block",
+                                                         onmouseover="swap(this,%s)"%("true"), onmouseout="restore(this,%s)"%("true"))
+
+                                                                                   
+                            row += 1
+
             else:
                 with tag("p"):
                     text(scenename + " does not have the latest ambient photo directory")
@@ -735,6 +775,8 @@ def disparity(directory, scenename, xy):
                         for file in sublist:
                             if os.path.isfile(file):
                                 doc.stag("img", href = file, klass = "line-img")
+
+            # range container for max and min values
             with tag("div", name = "range-container", style="display:none"):
                 if(xy == "x"):
                     path = directory + scenename + "/computed/merged2"
@@ -760,7 +802,7 @@ def disparity(directory, scenename, xy):
                     except:
                         print(path + "/pos" + str(pos_num) + "/minmax-%s.txt does not exist!"%(xy))
                     else:
-                        minmax = [float(x) for x in file.read().split()]
+                        minmax = [round(float(x),1) for x in file.read().split()]
                         if minmax[0] < 0:
                             minmax[0],minmax[1] = minmax[1],minmax[0]
                         with tag("div", name = "maxmin-unrec-pos"+str(pos_num), style="display:none"):

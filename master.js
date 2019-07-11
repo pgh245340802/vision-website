@@ -99,7 +99,7 @@ function projChange(value, row, decoded = false) {
     }
 }
 
-function expChange(value, row, ball = false) {
+function expChange(value, row) {
     var captions = document.getElementsByName("caption-container"+row)
     for (var i=0; i<captions.length; i++) {
         captions[i].innerHTML = "exp" + value
@@ -108,16 +108,23 @@ function expChange(value, row, ball = false) {
     for (var i=0; i<images.length; i++) {
         var source = images[i].src
         source = source.replace(/exp[0-9]/, "exp"+value)
-        if(ball){
-          if(!source.includes('ambientBall'))
-            source = source.replace('ambient','ambientBall')
-        } else {
-          if(source.includes('ambientBall'))
-            source = source.replace('ambientBall','ambient')
-        }
         images[i].src = source
     }
 }
+
+function swapBall(x) {
+
+    x.src = x.src.replace('ambient',"ambientBall")
+    
+}
+
+function restoreBall(x) {
+
+    x.src = x.src.replace('ambientBall',"ambient")
+    
+}
+
+
 
 function swap(x,reverse){
 
