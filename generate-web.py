@@ -114,8 +114,8 @@ def convert_pfms(directory):
                 else:
                     print("%s does not exist!!" % (file))
         resize_origs(directory, scenename)
-    # for scenename in scenes:
-    #     resize_origs(directory, scenename)
+#    for scenename in scenes:
+#        resize_origs(directory, scenename)
 
     return scenes
 
@@ -270,6 +270,26 @@ def resize_origs(directory, scenename):
         if not os.path.isfile(smallimg):
             command = "convert %s -resize 400x400 %s" % (img, smallimg)
             os.system(command)
+
+    # rectified ambient images
+    PATH = directory + scenename + "/computed/ambient/rectified/*/pos*/*exp*.png"
+    imgs = glob.glob(PATH)
+    for img in imgs:
+        smallimg = img.replace(directory, "./src/pngs/")
+        if not os.path.isfile(smallimg):
+            command = "convert %s -resize 400x400 %s" % (img, smallimg)
+            os.system(command)
+
+
+    # ambient ball images
+    PATH = directory + scenename + "/orig/ambientBall/photos/*/pos*/exp*.JPG"
+    imgs = glob.glob(PATH)
+    for img in imgs:
+        smallimg = img.replace(directory, "./src/pngs/")
+        if not os.path.isfile(smallimg):
+            command = "convert %s -resize 400x400 %s" % (img, smallimg)
+            os.system(command)
+    
 
     # scene photos
     PATH = directory + scenename + "/scenePictures/"
@@ -468,11 +488,15 @@ def imageBox(doc, tag, text, name, source, no, row, minmax, rec = "rec"):
                     onmouseover="posUpdate('%s', %s)" % (str(row), str(position)))
             position += 1
 
-def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", minmax = None,disparity = False, reverse=False):
+def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", minmax = None, disparity = False, reverse=False):
     if disparity:
         disp_bool = "true"
     else:
         disp_bool = "false"
+    if reverse:
+        reverse_bool = "true"
+    else:
+        reverse_bool = "false"
     with tag("div", name="preview-container"):
         with tag("p", name="imgtext"+str(row), klass="imgtext"):
             text(source[source.rfind("/")+1:])
@@ -482,7 +506,8 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", minmax = None
         with tag("div", name="image-container"+str(row)):
             with tag("a", href = source.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
                 class1 = "row"+str(row)+" "
-                doc.stag("img", src=source, klass=class1 + rec, id=name, name=str(row), style="display:block")
+                doc.stag("img", src=source, klass=class1 + rec, id=name, name=str(row), style="display:block",
+                         onmouseover="swap(this,%s)"%(reverse_bool), onmouseout="restore(this,%s)"%(reverse_bool))
         pospath = source[:source.rfind("pos") + 3] + "*"
         positions = glob.glob(pospath)
         positions.sort()
@@ -627,6 +652,27 @@ def ambient(scenename,directory):
                                                         id="thumb"+str(row)+str(expnum),
                                                         onmouseover= "expChange(%s, %s)" %(str(expnum),str(row)))
                                                 expnum += 1
+                                            
+                                            
+                                            # Thumbnail for ambient balls
+                                            index = pos.find('ambient') + 7
+                                            pos = pos[:index] + 'Ball' + pos[index:]
+                                            print(pos)
+                                            if os.path.isdir(pos):
+                                                doc.stag('br')
+                                                with tag("div", name="ball-caption-container"+str(row), klass = "caption-container"):
+                                                    text("ball")
+                                                exps = glob.glob(pos+"/exp*.JPG")
+                                                exps.sort()
+                                                expnum = 0
+                                                for exp in exps:
+                                                    with tag("div", name="thumbnail-container"):
+                                                        with tag("a", href = exp.replace("./src/pngs/", directory)):
+                                                            doc.stag("img", src=exp, name="thumbnail",
+                                                                     id="thumb"+str(row)+str(expnum),
+                                                                     onmouseover= "expChange(%s, %s, true)" %(str(expnum),str(row)))
+                                                    expnum += 1
+                                            
                             row += 1
             else:
                 with tag("p"):
@@ -750,9 +796,7 @@ def disparity(directory, scenename, xy):
                                             with tag("div", name="projnum-container"+str(row), klass = "projnum-container"):
                                                 text("proj0")
                                             for i in projlist:
-                                                source = sublist[0]
                                                 imgtag = source[source.rfind("pos0/")+5:]
-                                                # print(imgtag)
                                                 img = i + "/pos0/" + imgtag
                                                 proj = i[i.rfind("proj"):]
                                                 with tag("div", name="thumbnail-container-vertical"):

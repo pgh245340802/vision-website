@@ -51,6 +51,7 @@ div[name=preview-container] {
 
 .caption-container {
     display: inline-block;
+    margin: 2px;
 }
 
 .caption-container-home {

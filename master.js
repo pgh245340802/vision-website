@@ -79,10 +79,16 @@ function projChange(value, row, decoded = false) {
         captions[i].innerHTML = "proj" + value
     }
     var images = document.getElementsByClassName("row"+row)
+    var links = document.getElementsByName("imglink"+row)
+
     for (var i=0; i<images.length; i++) {
         var source = images[i].src
         source = source.replace(/proj[0-9]/, "proj"+value)
         images[i].src = source
+    }
+    for(var i=0; i<links.length; i++){
+        var newlink = source.substring(0,source.lastIndexOf("-")) + ".png"
+	links[i].href = newlink
     }
 
     if(decoded){
@@ -93,7 +99,7 @@ function projChange(value, row, decoded = false) {
     }
 }
 
-function expChange(value, row) {
+function expChange(value, row, ball = false) {
     var captions = document.getElementsByName("caption-container"+row)
     for (var i=0; i<captions.length; i++) {
         captions[i].innerHTML = "exp" + value
@@ -102,8 +108,31 @@ function expChange(value, row) {
     for (var i=0; i<images.length; i++) {
         var source = images[i].src
         source = source.replace(/exp[0-9]/, "exp"+value)
+        if(ball){
+          if(!source.includes('ambientBall'))
+            source = source.replace('ambient','ambientBall')
+        } else {
+          if(source.includes('ambientBall'))
+            source = source.replace('ambientBall','ambient')
+        }
         images[i].src = source
     }
+}
+
+function swap(x,reverse){
+
+    var pos = x.src.charAt(x.src.indexOf("pos")+3)
+    pos = reverse ? parseInt(pos)-1:parseInt(pos)+1
+    x.src = x.src.replace(/pos[0-9]/,"pos"+pos)
+
+}
+
+function restore(x,reverse){
+
+    var pos = x.src.charAt(x.src.indexOf("pos")+3)
+    pos = reverse ? parseInt(pos)+1:parseInt(pos)-1
+    x.src = x.src.replace(/pos[0-9]/,"pos"+pos)
+
 }
 
 function hideAndShow(hide,show) {
