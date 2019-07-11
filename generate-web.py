@@ -5,7 +5,7 @@ import subprocess
 import glob
 
 SCENES_DIRECTORY = "./src/scenes/"
-UTILSPATH = "/home/gpan/public_html/2019_summer_research/utils2/"
+UTILSPATH = "/Users/mango_sucks/Middlebury/CS/2019_summer_research/utils2/"
 UNRECTIFIED = ["/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-0initial.pfm",
 "/computed/decoded/unrectified/proj*/pos*/result[0-9][u,v]-4refined2.pfm",
 "/computed/disparity/unrectified/proj*/pos*/disp[0-9][0-9][x,y]-0initial.pfm",
@@ -165,15 +165,18 @@ def read_min_max(directory):
                 filelist.sort()
                 counter = 0
                 for file in filelist:
-                    imginfo = UTILSPATH + "imginfo"
-                    min_max = subprocess.check_output([imginfo, "-m", file])
+#                    imginfo = UTILSPATH + "imginfo"
+#                    min_max = subprocess.check_output([imginfo, "-m", file])
+#                    min_max = min_max.decode().split()
+                    imginfo = UTILSPATH + "pfmquantiles"
+                    min_max = subprocess.check_output([imginfo, file])
                     min_max = min_max.decode().split()
                     if counter >0:
-                        mins.append(-float(min_max[1]))
-                        maxs.append(-float(min_max[0]))
+                        mins.append(-float(min_max[-7]))
+                        maxs.append(-float(min_max[13]))
                     else:
-                        mins.append(float(min_max[0]))
-                        maxs.append(float(min_max[1]))
+                        mins.append(float(min_max[13]))
+                        maxs.append(float(min_max[-7]))
                     counter += 1
                 truemin = str(min(mins))
                 truemax = str(max(maxs))
@@ -202,15 +205,18 @@ def read_min_max(directory):
                 filelist.sort()
                 counter = 0
                 for file in filelist:
-                    imginfo = UTILSPATH + "imginfo"
-                    min_max = subprocess.check_output([imginfo, "-m", file])
+#                    imginfo = UTILSPATH + "imginfo"
+#                    min_max = subprocess.check_output([imginfo, "-m", file])
+#                    min_max = min_max.decode().split()
+                    imginfo = UTILSPATH + "pfmquantiles"
+                    min_max = subprocess.check_output([imginfo, file])
                     min_max = min_max.decode().split()
                     if counter >0:
-                        mins.append(-float(min_max[1]))
-                        maxs.append(-float(min_max[0]))
+                        mins.append(-float(min_max[-7]))
+                        maxs.append(-float(min_max[13]))
                     else:
-                        mins.append(float(min_max[0]))
-                        maxs.append(float(min_max[1]))
+                        mins.append(float(min_max[13]))
+                        maxs.append(float(min_max[-7]))
                     counter += 1
                 truemin = str(min(mins))
                 truemax = str(max(maxs))
