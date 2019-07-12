@@ -532,7 +532,7 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", minmax = None
                     img = "%s/%s%s%s%s-jet-400.jpg" % (pos, tag1, str(position-1)+str(position), name[0],tag2)
                     if os.path.isfile(img):
                         with tag("div", name="thumbnail-container"):
-                            with tag("a", href = img.replace("-400.jpg", ".png"), klass="imglink"):
+                            with tag("a", href = img.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
                                 doc.stag("img", src=img, klass=class1 + rec,
                                 id="thumb"+str(row)+str(position)+str(position-1)+str(no),
                                 onmouseover="posUpdateDisp('%s', '%s', %s, '%s')" % (str(row), str(position-1)+str(position),disp_bool,rec))
@@ -541,7 +541,7 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", minmax = None
                 img = "%s/%s%s%s%s-jet-400.jpg" % (pos, tag1, str(position)+str(position+1), name[0],tag2)
                 if os.path.isfile(img):
                     with tag("div", name="thumbnail-container"):
-                        with tag("a", href = img.replace("-400.jpg", ".png"), klass="imglink"):
+                        with tag("a", href = img.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
                             doc.stag("img", src=img, klass=class1 + rec,
                             id="thumb"+str(row)+str(position)+str(position+1)+str(no),
                             onmouseover="posUpdateDisp('%s', '%s', %s, '%s')" % (str(row), str(position)+str(position+1),disp_bool,rec))
@@ -640,7 +640,7 @@ def ambient(scenename,directory):
                             with tag("tr"):
                                 with tag("th", style="width:30px"):
                                     text(dir[dir.rfind("/")+1:])
-                                    with tag("div", name="caption-container"+str(row), klass = "caption-container"):
+                                    with tag("div", name="exp-caption-container"+str(row), klass = "caption-container"):
                                         text("exp0")
                                         exps = glob.glob(dir + "/pos0/exp*.JPG")
                                         exps.sort()
@@ -684,35 +684,66 @@ def ambient(scenename,directory):
                             with tag("tr"):
                                 with tag("th", style="width:30px"):
                                     text(dir[dir.rfind("/")+1:])
-                                    with tag("div", name="caption-container"+str(row), klass = "caption-container"):
+                                    with tag("div", name="exp-caption-container"+str(row), klass = "caption-container"):
                                         text("exp0")
                                         exps = glob.glob(dir + "/pos0/*exp*.png")
                                         exps.sort()
                                         expnum = 0
                                     for exp in exps:
-                                        with tag("div", name="thumbnail-container"):
+                                        with tag("div", name="thumbnail-container-vertical"):
                                             with tag("a", href = exp.replace("./src/pngs/", directory)):
                                                 doc.stag("img", src=exp, name="thumbnail",
                                                          id="thumb"+str(row)+str(expnum),
-                                                         onmouseover= "expChange(%s, %s)" %(str(expnum),str(row)))
+                                                         onmouseover= "expChange(%s, %s, true)" %(str(expnum),str(row)))
                                                 expnum += 1
                                 
                                 with tag("th", klass="imgbox-container"):
                                     source = dir + "/pos0/01rectified-exp0.png"
                                     with tag("div", name="preview-container"):
+                                        with tag("p", name="imgtext"+str(row), klass="imgtext"):
+                                            text(source[source.rfind("/")+1:])
                                         with tag("div", name="image-container"+str(row)):
                                             doc.stag("img", src=source, klass="row"+str(row), name=str(row), style="display:block",
-                                                         onmouseover="swap(this,%s)"%("false"), onmouseout="restore(this,%s)"%("false"))
+                                                         onmouseover="swap(this,false)", onmouseout="restore(this, false)")
+                                    pospath = source[:source.rfind("pos") + 3] + "*"
+                                    positions = glob.glob(pospath)
+                                    positions.sort()
+                                    position = 0
+                                    with tag("div", name="caption-container"+str(row), klass = "caption-container"):
+                                        text("pos"+str(position)+str(position+1))
+                                    for pos in positions:
+                                        img = "%s/%srectified-exp0.png"%(pos,str(position)+str(position+1))
+                                        if os.path.isfile(img):
+                                            with tag("div", name="thumbnail-container"):
+                                                with tag("a", href = img.replace("./src/pngs", directory), klass="imglink"):
+                                                    doc.stag("img", src=img, klass = "row"+str(row)+" rec", id="thumb"+str(row)+str(position)+str(position+1)+str(1),
+                                                    onmouseover="posUpdateAmb('%s', '%s')" % (str(row), str(position)+str(position+1)))
+                                        position += 1
+
 
                                 with tag("th", klass="imgbox-container"):
                                     source = dir + "/pos1/01rectified-exp0.png"
                                     with tag("div", name="preview-container"):
+                                        with tag("p", name="imgtext"+str(row), klass="imgtext"):
+                                            text(source[source.rfind("/")+1:])
                                         with tag("div", name="image-container"+str(row)):
                                             doc.stag("img", src=source, klass="row"+str(row), name=str(row), style="display:block",
-                                                         onmouseover="swap(this,%s)"%("true"), onmouseout="restore(this,%s)"%("true"))
+                                                         onmouseover="swap(this,true)", onmouseout="restore(this, true)")
+                                    position = 0
+                                    with tag("div", name="caption-container"+str(row), klass = "caption-container"):
+                                        text("pos"+str(position+1)+str(position))
+                                    for pos in positions:
+                                        if(pos!=positions[0]):
+                                            img = "%s/%srectified-exp0.png"%(pos,str(position-1)+str(position))
+                                            if os.path.isfile(img):
+                                                with tag("div", name="thumbnail-container"):
+                                                    with tag("a", href = img.replace("./src/pngs", directory), klass="imglink"):
+                                                        doc.stag("img", src=img, klass ="row"+str(row)+" rec",id="thumb"+str(row)+str(position)+str(position-1)+str(2),
+                                                                 onmouseover="posUpdateAmb('%s', '%s')" % (str(row), str(position-1)+str(position)))
+                                        position += 1
 
                                                                                    
-                            row += 1
+                        row += 1
 
             else:
                 with tag("p"):

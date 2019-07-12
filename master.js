@@ -73,6 +73,27 @@ function posUpdateDisp(name, pos, disparity = false, rec = 'rec') {
     }
 }
 
+function posUpdateAmb(name, pos) {
+    var captions = document.getElementsByName("caption-container"+name)
+    var images = document.getElementsByName(name)
+    var texts = document.getElementsByName("imgtext"+name)
+    for (var i = 0; i < captions.length; i++){
+        if (i == 1){
+            pos = pos[1] + pos[0]
+        }
+        var no = i + 1
+        captions[i].innerHTML = "pos" + pos
+        image = "thumb" + name + pos + no;
+	console.log(image)
+        images[i].src = document.getElementById(image).src;
+        newname = document.getElementById(image).src
+        newname = newname.substring(newname.lastIndexOf("/")+1,)
+        texts[i].innerHTML = newname
+    }
+}
+
+
+
 function projChange(value, row, decoded = false) {
     var captions = document.getElementsByName("projnum-container"+row)
     for (var i=0; i<captions.length; i++) {
@@ -99,8 +120,8 @@ function projChange(value, row, decoded = false) {
     }
 }
 
-function expChange(value, row) {
-    var captions = document.getElementsByName("caption-container"+row)
+function expChange(value, row, rec=false) {
+    var captions = document.getElementsByName("exp-caption-container"+row)
     for (var i=0; i<captions.length; i++) {
         captions[i].innerHTML = "exp" + value
     }
@@ -109,6 +130,24 @@ function expChange(value, row) {
         var source = images[i].src
         source = source.replace(/exp[0-9]/, "exp"+value)
         images[i].src = source
+    }
+    if(rec){
+	var name = document.getElementsByName("imgtext"+row)
+        newname = source.substring(source.lastIndexOf("/")+1,)
+        name[0].innerHTML = newname
+	name[1].innerHTML = newname
+	var images = document.getElementsByClassName("row"+row)
+	var links = document.getElementsByName("imglink"+row)
+
+	for (var i=0; i<images.length; i++) {
+            var source = images[i].src
+            source = source.replace(/proj[0-9]/, "proj"+value)
+            images[i].src = source
+	}
+	for(var i=0; i<links.length; i++){
+            var newlink = source.substring(0,source.lastIndexOf("-")) + ".png"
+	    links[i].href = newlink
+	}
     }
 }
 
