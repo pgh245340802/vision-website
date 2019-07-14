@@ -83,8 +83,7 @@ function posUpdateAmb(name, pos) {
         }
         var no = i + 1
         captions[i].innerHTML = "pos" + pos
-        image = "thumb" + name + pos + no;
-	console.log(image)
+        image = "thumb" + name + pos + no
         images[i].src = document.getElementById(image).src;
         newname = document.getElementById(image).src
         newname = newname.substring(newname.lastIndexOf("/")+1,)
