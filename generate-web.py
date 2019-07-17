@@ -241,15 +241,17 @@ def resize_origs(scenename):
     PATH = SCENES_DIRECTORY + scenename + "/orig/ambient/photos/*/pos*/exp*.JPG"
     resize_small_img(PATH)
 
+    # default ambient photos on home page
+    PATH = SCENES_DIRECTORY + scenename + "/orig/ambient/photos/default/pos*.JPG"
+    resize_small_img(PATH)
+
     # rectified ambient images
     PATH = SCENES_DIRECTORY + scenename + "/computed/ambient/rectified/*/pos*/*exp*.png"
     resize_small_img(PATH)
 
-
     # ambient ball images
     PATH = SCENES_DIRECTORY + scenename + "/orig/ambientBall/photos/*/pos*/exp*.JPG"
     resize_small_img(PATH)
-
 
     # scene photos
     PATH = SCENES_DIRECTORY + scenename + "/scenePictures/*.jpg"
@@ -329,7 +331,7 @@ def home(directory, scenes):
                 text("L - changed lighting between views.")
             with tag("p"):
                 text("Mouse over the input images to flip between views.")
-            with tag("table", style="width: 1080px", border=1, frame="hsides", rules="rows"):
+            with tag("table", style="width: 90%", border=1, frame="hsides", rules="rows"):
                 with tag("tr"):
                     with tag("th"):
                         text("Dataset")
@@ -364,26 +366,28 @@ def home(directory, scenes):
                                 text("calibration")
 
                         with tag("th"):
-
-                            with tag("div", name="preview-container"):
-                                source = "%s%s/orig/ambient/photos/L0/pos0/exp0.JPG" % ("./src/pngs/", scenename)
-                                with tag("a", href = source.replace("./src/pngs/", directory)):
-                                    home.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
-                                pospath = "%s%s/orig/ambient/photos/L0/pos*" % ("./src/pngs/", scenename)
-                                positions = glob.glob(pospath)
-                                positions.sort()
-                                position = 0
-                                with tag("div", name="caption-container-home"+str(row), klass = "caption-container"):
-                                    text("pos"+str(position))
-                                for pos in positions:
-                                    no = 0
-                                    with tag("div", name="thumbnail-container"):
-                                        img = "%s/exp0.JPG" % (pos)
-                                        with tag("a", href = img.replace("./src/pngs/", directory)):
-                                            home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
-                                            id="thumb"+str(row)+str(position)+str(no),
-                                            onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
-                                    position += 1
+                            imgPath = "%s%s/orig/ambient/photos/default/pos*.JPG" % ("./src/pngs/", scenename)
+                            images = glob.glob(imgPath)
+                            images.sort()
+                            if images:
+                                with tag("div", name="preview-container"):
+                                    source = "%s%s/orig/ambient/photos/default/pos0.JPG" % ("./src/pngs/", scenename)
+                                    with tag("a", href = source.replace("./src/pngs/", directory)):
+                                        home.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
+                                    position = 0
+                                    with tag("div", name="caption-container-home"+str(row), klass = "caption-container"):
+                                        text("pos"+str(position))
+                                    for img in images:
+                                        no = 0
+                                        with tag("div", name="thumbnail-container"):
+                                            with tag("a", href = img.replace("./src/pngs/", directory)):
+                                                home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
+                                                id="thumb"+str(row)+str(position)+str(no),
+                                                onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
+                                        position += 1
+                            else:
+                                with tag("div"):
+                                    text("%s does not have default ambient images!" %(scenename))
 
 
                         with tag("th"):
