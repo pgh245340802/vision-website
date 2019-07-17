@@ -560,6 +560,14 @@ def ambient(scenename,directory):
                 L1, L2, L3...refers to different lighting conditions.
                 T1, T2...means torch mode was used.
                 F1, F2... means flash mode was used""")
+
+            with tag("div", name = "line-container"):
+                PATH = "./src/pngs/" + scenename + "/orig/ambient*/photos/*/*/exp*.JPG"
+                imgs = glob.glob(PATH)
+                for img in imgs:
+                    if os.path.isfile(img):
+                        doc.stag("img", href = img, klass = "line-img")
+
             positions = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/L0/pos*")
             positions.sort()
             if positions:
@@ -578,7 +586,7 @@ def ambient(scenename,directory):
                         for pos in positions:
                             with tag("th"):
                                 text(pos[pos.rfind("pos"):])
-                    dirs = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/*")
+                    dirs = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/?[0-9]")
                     dirs.sort()
                     row = 0
                     for dir in dirs:
