@@ -47,7 +47,17 @@ def convert_pfms(directory):
         os.system(command)
         inputpath = directory + scenename
         outputpath = "./src/pngs/" + scenename
+
+        # duplicate the code structure
         duplicate_folders(inputpath, outputpath)
+
+        # resize original images
+        resize_origs(scenename)
+
+        # read the min and max disparity range
+        read_min_max(scenename)
+
+        # convert pfm to png
         # -------------------------------------DECODED----------------------------------
         for LIST in [UNRECTIFIED[:2], RECTIFIED[:2]]:
             for pfm in LIST:
@@ -113,193 +123,148 @@ def convert_pfms(directory):
                             pfm2png(file, savepath, str(-float(minmax[1])), str(-float(minmax[0])))
                 else:
                     print("%s does not exist!!" % (file))
-        resize_origs(directory, scenename)
-#    for scenename in scenes:
-#        resize_origs(directory, scenename)
 
     return scenes
 
-def read_min_max(directory):
-    dirnames = os.listdir(directory)
-    scenes = []
-    for dirname in dirnames:
-       if is_scene_directory(directory + dirname + "/"):
-            scenes.append(dirname)
-    scenes.sort()
-    for scenename in scenes:
+def read_min_max(scenename):
+    # -------------------------------------DECODED----------------------------------
+    projpath = SCENES_DIRECTORY + scenename +"/computed/decoded/unrectified/proj*"
+    projlist = glob.glob(projpath)
+    projlist.sort()
+    for proj in projlist:
+        for i in ["u","v"]:
+            mins = []
+            maxs = []
+            filepath = "%s/pos*/result[0-9]%s-4refined2.pfm" % (proj, i)
+            filelist = glob.glob(filepath)
+            for file in filelist:
+                imginfo = UTILSPATH + "imginfo"
+                min_max = subprocess.check_output([imginfo, "-m", file])
+                min_max = min_max.decode().split()
+                mins.append(float(min_max[0]))
+                maxs.append(float(min_max[1]))
+            truemin = str(min(mins))
+            truemax = str(max(maxs))
+            txtpath = "%s/minmax-%s.txt" % (proj, i)
+            txt = open(txtpath, "w")
+            txt.write(truemin+"\n")
+            txt.write(truemax+"\n")
+            txt.close
 
-        # -------------------------------------DECODED----------------------------------
-        projpath = directory + scenename +"/computed/decoded/unrectified/proj*"
-        projlist = glob.glob(projpath)
-        projlist.sort()
-        for proj in projlist:
-            for i in ["u","v"]:
-                mins = []
-                maxs = []
-                filepath = "%s/pos*/result[0-9]%s-4refined2.pfm" % (proj, i)
-                filelist = glob.glob(filepath)
-                for file in filelist:
-                    imginfo = UTILSPATH + "imginfo"
-                    min_max = subprocess.check_output([imginfo, "-m", file])
-                    min_max = min_max.decode().split()
-                    mins.append(float(min_max[0]))
-                    maxs.append(float(min_max[1]))
-                truemin = str(min(mins))
-                truemax = str(max(maxs))
-                txtpath = "%s/minmax-%s.txt" % (proj, i)
-                txt = open(txtpath, "w")
-                txt.write(truemin+"\n")
-                txt.write(truemax+"\n")
-                txt.close
-
-        # -------------------------------------UNRECTIFIED DISPARITY-------------------
-        for i in ["x", "y"]:
-            path = directory + scenename +"/computed/disparity/unrectified/proj0"
-            posnum = len(glob.glob(path+"/pos*"))
-            for j in range(posnum-1):
-                mins = []
-                maxs = []
-                pos = str(j)+str(j+1)
-                filepath = "%s/pos*/disp%s%s-1crosscheck1.pfm" % (path, pos, i)
-                filelist = glob.glob(filepath)
-                filelist.sort()
-                counter = 0
-                for file in filelist:
+    # -------------------------------------UNRECTIFIED DISPARITY-------------------
+    for i in ["x", "y"]:
+        path = SCENES_DIRECTORY + scenename +"/computed/disparity/unrectified/proj0"
+        posnum = len(glob.glob(path+"/pos*"))
+        for j in range(posnum-1):
+            mins = []
+            maxs = []
+            pos = str(j)+str(j+1)
+            filepath = "%s/pos*/disp%s%s-1crosscheck1.pfm" % (path, pos, i)
+            filelist = glob.glob(filepath)
+            filelist.sort()
+            counter = 0
+            for file in filelist:
 #                    imginfo = UTILSPATH + "imginfo"
 #                    min_max = subprocess.check_output([imginfo, "-m", file])
 #                    min_max = min_max.decode().split()
-                    imginfo = UTILSPATH + "pfmquantiles"
-                    min_max = subprocess.check_output([imginfo, file])
-                    min_max = min_max.decode().split()
-                    if counter >0:
-                        mins.append(-float(min_max[-7]))
-                        maxs.append(-float(min_max[13]))
-                    else:
-                        mins.append(float(min_max[13]))
-                        maxs.append(float(min_max[-7]))
-                    counter += 1
-                truemin = str(min(mins))
-                truemax = str(max(maxs))
-                txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
-                txt = open(txtpath, "w")
-                txt.write(truemin+"\n")
-                txt.write(truemax+"\n")
-                txt.close
-
-        # -------------------------------------RECTIFIED DISPARITY-------------------
-        for i in ["x", "y"]:
-            if i == "x":
-                path = directory + scenename + "/computed/merged2"
-            else:
-                path = directory + scenename + "/computed/merged/rectified"
-            posnum = len(glob.glob(path+"/pos*"))
-            for j in range(posnum-1):
-                mins = []
-                maxs = []
-                pos = str(j)+str(j+1)
-                if i == "x":
-                    filepath = "%s/pos*/disp%s%s-4crosscheck2.pfm" % (path, pos, i)
+                imginfo = UTILSPATH + "pfmquantiles"
+                min_max = subprocess.check_output([imginfo, file])
+                min_max = min_max.decode().split()
+                if counter >0:
+                    mins.append(-float(min_max[-7]))
+                    maxs.append(-float(min_max[13]))
                 else:
-                    filepath = "%s/pos*/disp%s%s-1crosscheck.pfm" % (path, pos, i)
-                filelist = glob.glob(filepath)
-                filelist.sort()
-                counter = 0
-                for file in filelist:
+                    mins.append(float(min_max[13]))
+                    maxs.append(float(min_max[-7]))
+                counter += 1
+            truemin = str(min(mins))
+            truemax = str(max(maxs))
+            txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
+            txt = open(txtpath, "w")
+            txt.write(truemin+"\n")
+            txt.write(truemax+"\n")
+            txt.close
+
+    # -------------------------------------RECTIFIED DISPARITY-------------------
+    for i in ["x", "y"]:
+        if i == "x":
+            path = SCENES_DIRECTORY + scenename + "/computed/merged2"
+        else:
+            path = SCENES_DIRECTORY + scenename + "/computed/merged/rectified"
+        posnum = len(glob.glob(path+"/pos*"))
+        for j in range(posnum-1):
+            mins = []
+            maxs = []
+            pos = str(j)+str(j+1)
+            if i == "x":
+                filepath = "%s/pos*/disp%s%s-4crosscheck2.pfm" % (path, pos, i)
+            else:
+                filepath = "%s/pos*/disp%s%s-1crosscheck.pfm" % (path, pos, i)
+            filelist = glob.glob(filepath)
+            filelist.sort()
+            counter = 0
+            for file in filelist:
 #                    imginfo = UTILSPATH + "imginfo"
 #                    min_max = subprocess.check_output([imginfo, "-m", file])
 #                    min_max = min_max.decode().split()
-                    imginfo = UTILSPATH + "pfmquantiles"
-                    min_max = subprocess.check_output([imginfo, file])
-                    min_max = min_max.decode().split()
-                    if counter >0:
-                        mins.append(-float(min_max[-7]))
-                        maxs.append(-float(min_max[13]))
-                    else:
-                        mins.append(float(min_max[13]))
-                        maxs.append(float(min_max[-7]))
-                    counter += 1
-                truemin = str(min(mins))
-                truemax = str(max(maxs))
-                txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
-                txt = open(txtpath, "w")
-                txt.write(truemin+"\n")
-                txt.write(truemax+"\n")
-                txt.close
+                imginfo = UTILSPATH + "pfmquantiles"
+                min_max = subprocess.check_output([imginfo, file])
+                min_max = min_max.decode().split()
+                if counter >0:
+                    mins.append(-float(min_max[-7]))
+                    maxs.append(-float(min_max[13]))
+                else:
+                    mins.append(float(min_max[13]))
+                    maxs.append(float(min_max[-7]))
+                counter += 1
+            truemin = str(min(mins))
+            truemax = str(max(maxs))
+            txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
+            txt = open(txtpath, "w")
+            txt.write(truemin+"\n")
+            txt.write(truemax+"\n")
+            txt.close
 
-def resize_origs(directory, scenename):
+def resize_origs(scenename):
+
+    print("resizing original images for %s..."%(scenename))
 
     # stereo calibration images
-    PATH = directory + scenename + "/orig/calibration/stereo/"
-    positions = glob.glob(PATH + "pos*")
-
-    for pos in positions:
-        imgs = glob.glob(pos + "/IMG*.JPG")
-        for img in imgs:
-            smallimg = img.replace(directory, "./src/pngs/")
-            if not os.path.isfile(smallimg):
-                command = "convert %s -resize 400x400 %s" %(img, smallimg)
-                os.system(command)
+    PATH = SCENES_DIRECTORY + scenename + "/orig/calibration/stereo/pos*/IMG*.JPG"
+    resize_small_img(PATH)
 
     # intrinsics calibration images
-    PATH = directory + scenename + "/orig/calibration/intrinsics/"
-    imgs = glob.glob(PATH + "*.JPG")
-    for img in imgs:
-        smallimg = img.replace(directory, "./src/pngs/")
-        if not os.path.isfile(smallimg):
-            command = "convert %s -resize 400x400 %s" %(img, smallimg)
-            os.system(command)
+    PATH = SCENES_DIRECTORY + scenename + "/orig/calibration/intrinsics/*.JPG"
+    resize_small_img(PATH)
 
-    # ambient images
-    PATH = directory + scenename + "/orig/ambient/photos/normal/"
-    positions = glob.glob(PATH + "pos*")
-    for pos in positions:
-        exps = glob.glob(pos + "/exp*")
-        for exp in exps:
-            imgs = glob.glob(exp + "/IMG*.JPG")
-            for img in imgs:
-                smallimg = img.replace(directory, "./src/pngs/")
-                if not os.path.isfile(smallimg):
-                    command = "convert %s -resize 400x400 %s" % (img, smallimg)
-                    os.system(command)
-
-    # new ambient structures
-    PATH = directory + scenename + "/orig/ambient/photos/*/pos*/exp*.JPG"
-    imgs = glob.glob(PATH)
-    for img in imgs:
-        smallimg = img.replace(directory, "./src/pngs/")
-        if not os.path.isfile(smallimg):
-            command = "convert %s -resize 400x400 %s" % (img, smallimg)
-            os.system(command)
+    # ambient photos
+    PATH = SCENES_DIRECTORY + scenename + "/orig/ambient/photos/*/pos*/exp*.JPG"
+    resize_small_img(PATH)
 
     # rectified ambient images
-    PATH = directory + scenename + "/computed/ambient/rectified/*/pos*/*exp*.png"
-    imgs = glob.glob(PATH)
-    for img in imgs:
-        smallimg = img.replace(directory, "./src/pngs/")
-        if not os.path.isfile(smallimg):
-            command = "convert %s -resize 400x400 %s" % (img, smallimg)
-            os.system(command)
+    PATH = SCENES_DIRECTORY + scenename + "/computed/ambient/rectified/*/pos*/*exp*.png"
+    resize_small_img(PATH)
 
 
     # ambient ball images
-    PATH = directory + scenename + "/orig/ambientBall/photos/*/pos*/exp*.JPG"
-    imgs = glob.glob(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/orig/ambientBall/photos/*/pos*/exp*.JPG"
+    resize_small_img(PATH)
+
+
+    # scene photos
+    PATH = SCENES_DIRECTORY + scenename + "/scenePictures/*.jpg"
+    resize_small_img(PATH)
+
+    print("resizing complete")
+
+
+def resize_small_img(img_path):
+    imgs = glob.glob(img_path)
     for img in imgs:
-        smallimg = img.replace(directory, "./src/pngs/")
+        smallimg = img.replace(SCENES_DIRECTORY, "./src/pngs/")
         if not os.path.isfile(smallimg):
             command = "convert %s -resize 400x400 %s" % (img, smallimg)
             os.system(command)
-    
-
-    # scene photos
-    PATH = directory + scenename + "/scenePictures/"
-    if os.path.isdir(PATH):
-        imgs = glob.glob(PATH + "*.jpg")
-        for img in imgs:
-            smallimg = img.replace(directory, "./src/pngs/")
-            if not os.path.isfile(smallimg):
-                command = "convert %s -resize 400x400 %s" % (img, smallimg)
-                os.system(command)
 
 
 
@@ -399,30 +364,7 @@ def home(directory, scenes):
                                 text("calibration")
 
                         with tag("th"):
-                            # --------------------------ORIGINAL--------------------------------
-                            # this is the ambient code for old folder structure
-                            # if(row<4):
-                            #     with tag("div", name="preview-container"):
-                            #         source = "%s%s/orig/ambient/photos/normal/pos0/exp1/IMG1.JPG" % ("./src/pngs/", scenename)
-                            #         with tag("a", href = source.replace("./src/pngs/", directory)):
-                            #             home.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
-                            #         pospath = "%s%s/orig/ambient/photos/normal/pos*" % ("./src/pngs/", scenename)
-                            #         positions = glob.glob(pospath)
-                            #         positions.sort()
-                            #         position = 0
-                            #         with tag("div", name="caption-container-home"+str(row), klass = "caption-container"):
-                            #             text("pos"+str(position))
-                            #         for pos in positions:
-                            #             no = 0
-                            #             with tag("div", name="thumbnail-container"):
-                            #                 img = "%s/exp1/IMG1.JPG" % (pos)
-                            #                 with tag("a", href = img.replace("./src/pngs/", directory)):
-                            #                     home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
-                            #                     id="thumb"+str(row)+str(position)+str(no),
-                            #                     onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
-                            #             position += 1
-                            # else:
-                            
+
                             with tag("div", name="preview-container"):
                                 source = "%s%s/orig/ambient/photos/L0/pos0/exp0.JPG" % ("./src/pngs/", scenename)
                                 with tag("a", href = source.replace("./src/pngs/", directory)):
@@ -617,7 +559,7 @@ def ambient(scenename,directory):
             positions = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/L0/pos*")
             positions.sort()
             if positions:
-                
+
                 with tag("div", name = "button-area", style="margin:10px"):
                     with tag("button", onclick = "hideAndShow('rec','unrec')"):
                         text("Show Unrectified Ambient Images")
@@ -662,8 +604,8 @@ def ambient(scenename,directory):
                                             source = pos + "/exp0.JPG"
                                             doc.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block",
                                                      onmouseover="swapBall(this)", onmouseout="restoreBall(this)")
-                                            
-                                                                                   
+
+
                             row += 1
 
                 # rectified ambient images table
@@ -696,7 +638,7 @@ def ambient(scenename,directory):
                                                          id="thumb"+str(row)+str(expnum),
                                                          onmouseover= "expChange(%s, %s, true)" %(str(expnum),str(row)))
                                                 expnum += 1
-                                
+
                                 with tag("th", klass="imgbox-container"):
                                     source = dir + "/pos0/01rectified-exp0.png"
                                     with tag("div", name="preview-container"):
@@ -742,7 +684,7 @@ def ambient(scenename,directory):
                                                                  onmouseover="posUpdateAmb('%s', '%s')" % (str(row), str(position-1)+str(position)))
                                         position += 1
 
-                                                                                   
+
                         row += 1
 
             else:
@@ -1127,8 +1069,7 @@ if __name__ == "__main__":
         else:
             print("You already have a src folder. Put your scene folder in ./src/scenes, then run: python3 generate-web.py")
     else:
-        if os.path.isdir('./src'):
-            read_min_max(SCENES_DIRECTORY)
+        if os.path.isdir('./src') and os.path.isdir('./src/pngs'):
             scenes = convert_pfms(SCENES_DIRECTORY)
             home(SCENES_DIRECTORY, scenes)
         else:
