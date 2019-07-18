@@ -250,11 +250,12 @@ def resize_origs(scenename):
     resize_small_img(PATH)
 
     # default unrectified ambient photos on home page
-    PATH = SCENES_DIRECTORY + scenename + "/orig/ambient/photos/default/pos*.JPG"
+    PATH = SCENES_DIRECTORY + scenename + "/defaultAmbient/unrectified/pos*.JPG"
     resize_small_img(PATH)
 
     # default rectified ambient photos on home page
-    PATH = SCENES_DIRECTORY + scenename + "/computed/ambient/rectified/default/pos*/*.png"
+    PATH = SCENES_DIRECTORY + scenename + "/defaultAmbient/rectified/pos*/*.png"
+    resize_small_img(PATH)
 
     # rectified ambient images
     PATH = SCENES_DIRECTORY + scenename + "/computed/ambient/rectified/*/pos*/*exp*.png"
@@ -370,12 +371,12 @@ def home(directory, scenes):
                                 text("calibration")
 
                         with tag("th"):
-                            imgPath = "%s%s/orig/ambient/photos/default/pos*.JPG" % ("./src/pngs/", scenename)
+                            imgPath = "%s%s/defaultAmbient/unrectified/pos*.JPG" % ("./src/pngs/", scenename)
                             images = glob.glob(imgPath)
                             images.sort()
                             if images:
                                 with tag("div", name="preview-container"):
-                                    source = "%s%s/orig/ambient/photos/default/pos0.JPG" % ("./src/pngs/", scenename)
+                                    source = "%s%s/defaultAmbient/unrectified/pos0.JPG" % ("./src/pngs/", scenename)
                                     with tag("a", href = source.replace("./src/pngs/", directory)):
                                         home.stag("img", src=source, klass="row"+str(row), id= "unrec"+str(row), style = "display: block")
                                     position = 0
@@ -394,7 +395,7 @@ def home(directory, scenes):
                                     text("%s does not have default unrectifeid ambient images!" %(scenename))
 
                         with tag("th", klass="imgbox-container"):
-                            imgPath = "%s%s/computed/ambient/rectified/default/pos0/01rectified*.png" % ("./src/pngs/", scenename)
+                            imgPath = "%s%s/defaultAmbient/rectified/pos0/01rectified*.png" % ("./src/pngs/", scenename)
                             image = glob.glob(imgPath)
                             if image:
                                 with tag("div", name="preview-container"):
