@@ -319,18 +319,11 @@ def home(directory, scenes):
             with tag("h1"):
                 text("Summer 2019 Dataset")
         with tag("body"):
-            with tag("p", name="comments"):
-                text("THIS DESCRIPTION WILL BE UPDATED")
-                home.asis("<br>")
-                text("1 image pair with ground truth, shown below at 10% of their original size. Trailing letters indicate dataset types:")
-                home.asis("<br>")
-                text("P - perfect rectification (imperfect by default);")
-                home.asis("<br>")
-                text("E - changed exposure between views;")
-                home.asis("<br>")
-                text("L - changed lighting between views.")
             with tag("p"):
                 text("Mouse over the input images to flip between views.")
+                home.stag("br")
+                text("Below each main image, mouse over the previews to see different camera positions.")
+
             with tag("table", style="width: 90%", border=1, frame="hsides", rules="rows"):
                 with tag("tr"):
                     with tag("th"):
@@ -555,23 +548,25 @@ def ambient(scenename,directory):
             with tag("h3"):
                 text("Description:")
             with tag("p"):
-                text("""This webpage displays all the ambient photos taken under different lighting conditions.
-                Below each main image, mouse over the previews to see different exposures.
-                L1, L2, L3...refers to different lighting conditions.
-                T1, T2...means torch mode was used.
-                F1, F2... means flash mode was used""")
-
-            with tag("div", name = "line-container"):
-                PATH = "./src/pngs/" + scenename + "/orig/ambient*/photos/*/*/exp*.JPG"
-                imgs = glob.glob(PATH)
-                for img in imgs:
-                    if os.path.isfile(img):
-                        doc.stag("img", href = img, klass = "line-img")
+                text("This webpage displays all the ambient photos taken under different lighting conditions.")
+                doc.stag("br")
+                text("Below each main image, mouse over the previews to see different exposures.")
+                doc.stag("br")
+                text("On the left, mouse over different previews to see different exposures.")
+                doc.stag("br")
+                text("Mouse over the unrectified ambient image to see the ambient ball image.")
+                doc.stag("br")
+                text("Mouse over the rectified ambient image to switch to the other view.")
+                doc.stag("br")
+                text("""L0, L1, L2, L3...refers to different lighting conditions.
+                T0, T1, T2...means torch mode was used.
+                F0, F1, F2... means flash mode was used""")
 
             positions = glob.glob("./src/pngs/" + scenename + "/orig/ambient/photos/L0/pos*")
             positions.sort()
             if positions:
-
+                with tag("p"):
+                    text("The following buttons can be used to switch between unrectified and rectified ambient images.")
                 with tag("div", name = "button-area", style="margin:10px"):
                     with tag("button", onclick = "hideAndShow('rec','unrec')"):
                         text("Show Unrectified Ambient Images")
@@ -699,6 +694,13 @@ def ambient(scenename,directory):
 
                         row += 1
 
+                with tag("div", name = "line-container"):
+                    PATH = "./src/pngs/" + scenename + "/orig/ambient*/photos/*/*/exp*.JPG"
+                    imgs = glob.glob(PATH)
+                    for img in imgs:
+                        if os.path.isfile(img):
+                            doc.stag("img", href = img, klass = "line-img")
+
             else:
                 with tag("p"):
                     text(scenename + " does not have the latest ambient photo directory")
@@ -727,13 +729,13 @@ def disparity(directory, scenename, xy):
             with tag("h3"):
                 text("Description:")
             with tag("p"):
-                text("""This webpage displays all relevant images in the image processing pipeline.
-                On the left, mouse over different previews to see different projector positions.
-                Below each main image, mouse over the previews to see different camera positions.
-                The tags also show you which image you are viewing. If the position is identified with three digits, e.g. pos223,
-                it means that you are viewing the processed image between different camera positions. The last two digits suggest
-                the positions referenced, and the first one indicate the position folder it came from. In this case, pos223 means that
-                it is processed from images from position 2 and 3, and it comes from the folder pos2, which means that pos2 is used as the left position.""")
+                text("This webpage displays all relevant images in the image processing pipeline.")
+                doc.stag("br")
+                text("On the left, mouse over different previews to see different projector positions.")
+                doc.stag("br")
+                text("Below each main image, mouse over the previews to see different camera positions.")
+                doc.stag("br")
+                text("The numbers in the brackets above the image indicate the disparity range used to display the image.")
             with tag("p"):
                 text("""The following buttons and selector can be used to select which images to appear on the website""")
             with tag("button", onclick = "hideAndShow('rec','unrec')"):
@@ -883,13 +885,13 @@ def decoded(scenename,directory):
             with tag("h3"):
                 text("Description:")
             with tag("p"):
-                text("""This webpage displays all relevant images in the image processing pipeline.
-                On the left, mouse over different previews to see different projector positions.
-                Below each main image, mouse over the previews to see different camera positions.
-                The tags also show you which image you are viewing. If the position is identified with three digits, e.g. pos223,
-                it means that you are viewing the processed image between different camera positions. The last two digits suggest
-                the positions referenced, and the first one indicate the position folder it came from. In this case, pos223 means that
-                it is processed from images from position 2 and 3, and it comes from the folder pos2, which means that pos2 is used as the left position.""")
+                text("This webpage displays all relevant images in the image processing pipeline.")
+                doc.stag("br")
+                text("On the left, mouse over different previews to see different projector positions.")
+                doc.stag("br")
+                text("Below each main image, mouse over the previews to see different camera positions.")
+                doc.stag("br")
+                text("The numbers in the brackets above the image indicate the disparity range used to display the image.")
             with tag("p"):
                 text("""The following buttons and selector can be used to select which images to appear on the website""")
             with tag("button", onclick = "hideAndShow('rec','unrec')"):
