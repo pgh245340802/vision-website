@@ -33,19 +33,19 @@ def duplicate_folders(inputpath, outputpath):
 def is_scene_directory(directory_path):
     return os.path.isdir(directory_path) and os.path.isdir(directory_path + "computed") and os.path.isdir(directory_path + "orig") and os.path.isdir(directory_path + "settings")
 
-def convert_pfms(directory):
-    dirnames = os.listdir(directory)
+def generate_images():
+    dirnames = os.listdir(SCENES_DIRECTORY)
     scenes = []
     for dirname in dirnames:
-        if is_scene_directory(directory + dirname + "/"):
+        if is_scene_directory(SCENES_DIRECTORY + dirname + "/"):
             scenes.append(dirname)
     scenes.sort()
     for scenename in scenes:
-        if os.path.isdir("./src/pngs/"+ scenename):
-            continue
+        # if os.path.isdir("./src/pngs/"+ scenename):
+        #     continue
         command = "mkdir ./src/pngs/" + scenename
         os.system(command)
-        inputpath = directory + scenename
+        inputpath = SCENES_DIRECTORY + scenename
         outputpath = "./src/pngs/" + scenename
 
         # duplicate the code structure
@@ -53,78 +53,86 @@ def convert_pfms(directory):
 
         # resize original images
         resize_origs(scenename)
-
+        
         # read the min and max disparity range
         read_min_max(scenename)
 
-        # convert pfm to png
-        # -------------------------------------DECODED----------------------------------
-        for LIST in [UNRECTIFIED[:2], RECTIFIED[:2]]:
-            for pfm in LIST:
-                filename= directory + scenename + pfm
-                sublist = glob.glob(filename)
-                for file in sublist:
-                    if os.path.isfile(file):
-                        txtpath = directory + scenename +"/computed/decoded/unrectified/proj"
-                        txtpath = txtpath + file[file.find("proj")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
-                        txt = open(txtpath, "r")
-                        minmax = txt.read().split()
-                        savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
-                        pfm2png(file, savepath, minmax[0], minmax[1])
-                    else:
-                        print("%s does not exist!!" % (file))
-
-        # --------------------------------RECTIFIED DISPARITY----------------------------------------
-        for pfm in RECTIFIED[2:]:
-            filename= directory + scenename + pfm
-            sublist = glob.glob(filename)
-            for file in sublist:
-                if os.path.isfile(file):
-                    if file[file.rfind("-")-1] == "x":
-                        txtpath = directory + scenename +"/computed/merged2/pos"
-                    else:
-                        txtpath = directory + scenename +"/computed/merged/rectified/pos"
-                    txtpath = txtpath + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
-                    txt = open(txtpath, "r")
-                    minmax = txt.read().split()
-                    savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
-                    if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
-                        if(float(minmax[0])>0):
-                            pfm2png(file, savepath, minmax[0], minmax[1])
-                        else:
-                            pfm2png(file, savepath, minmax[1], minmax[0])
-                    else:
-                        if(float(minmax[0])>0):
-                            pfm2png(file, savepath, str(-float(minmax[0])), str(-float(minmax[1])))
-                        else:
-                            pfm2png(file, savepath, str(-float(minmax[1])), str(-float(minmax[0])))
-                else:
-                    print("%s does not exist!!" % (file))
-
-        # --------------------------------UNRECTIFIED DISPARITY----------------------------------------
-        for pfm in UNRECTIFIED[2:4]:
-            filename= directory + scenename + pfm
-            sublist = glob.glob(filename)
-            for file in sublist:
-                if os.path.isfile(file):
-                    txtpath = directory + scenename +"/computed/disparity/unrectified/proj0/pos" + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
-                    txt = open(txtpath, "r")
-                    minmax = txt.read().split()
-                    savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
-                    if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
-                        if(float(minmax[0])>0):
-                            pfm2png(file, savepath, minmax[0], minmax[1])
-                        else:
-                            pfm2png(file, savepath, minmax[1], minmax[0])
-                    else:
-                        if(float(minmax[0])>0):
-                            pfm2png(file, savepath, str(-float(minmax[0])), str(-float(minmax[1])))
-                        else:
-                            pfm2png(file, savepath, str(-float(minmax[1])), str(-float(minmax[0])))
-                else:
-                    print("%s does not exist!!" % (file))
+        # convert pfm to png based on min max
+        convert_pfms(SCENES_DIRECTORY,scenename)
 
     return scenes
+        
+        
+        
+
+def convert_pfms(directory,scenename):
+    # convert pfm to png
+    # -------------------------------------DECODED----------------------------------
+    for LIST in [UNRECTIFIED[:2], RECTIFIED[:2]]:
+        for pfm in LIST:
+            filename= directory + scenename + pfm
+            sublist = glob.glob(filename)
+            for file in sublist:
+                if os.path.isfile(file):
+                    txtpath = directory + scenename +"/computed/decoded/unrectified/proj"
+                    txtpath = txtpath + file[file.find("proj")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
+                    txt = open(txtpath, "r")
+                    minmax = txt.read().split()
+                    savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
+                    pfm2png(file, savepath, minmax[0], minmax[1])
+                else:
+                    print("%s does not exist!!" % (file))
+
+    # --------------------------------RECTIFIED DISPARITY----------------------------------------
+    for pfm in RECTIFIED[2:]:
+        filename= directory + scenename + pfm
+        sublist = glob.glob(filename)
+        for file in sublist:
+            if os.path.isfile(file):
+                if file[file.rfind("-")-1] == "x":
+                    txtpath = directory + scenename +"/computed/merged2/pos"
+                else:
+                    txtpath = directory + scenename +"/computed/merged/rectified/pos"
+                txtpath = txtpath + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
+                txt = open(txtpath, "r")
+                minmax = txt.read().split()
+                savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
+                if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
+                    if(float(minmax[0])>0):
+                        pfm2png(file, savepath, minmax[0], minmax[1])
+                    else:
+                        pfm2png(file, savepath, minmax[1], minmax[0])
+                else:
+                    if(float(minmax[0])>0):
+                        pfm2png(file, savepath, str(-float(minmax[0])), str(-float(minmax[1])))
+                    else:
+                        pfm2png(file, savepath, str(-float(minmax[1])), str(-float(minmax[0])))
+            else:
+                print("%s does not exist!!" % (file))
+
+    # --------------------------------UNRECTIFIED DISPARITY----------------------------------------
+    for pfm in UNRECTIFIED[2:4]:
+        filename= directory + scenename + pfm
+        sublist = glob.glob(filename)
+        for file in sublist:
+            if os.path.isfile(file):
+                txtpath = directory + scenename +"/computed/disparity/unrectified/proj0/pos" + file[file.rfind("disp")+4] + "/minmax-%s.txt" % (file[file.rfind("-")-1])
+                txt = open(txtpath, "r")
+                minmax = txt.read().split()
+                savepath = "./src/pngs/" + scenename + file[file.rfind("/computed"):file.rfind(".pfm")]
+                if file[file.rfind("pos")+3] == file[file.rfind("disp")+4]:
+                    if(float(minmax[0])>0):
+                        pfm2png(file, savepath, minmax[0], minmax[1])
+                    else:
+                        pfm2png(file, savepath, minmax[1], minmax[0])
+                else:
+                    if(float(minmax[0])>0):
+                        pfm2png(file, savepath, str(-float(minmax[0])), str(-float(minmax[1])))
+                    else:
+                        pfm2png(file, savepath, str(-float(minmax[1])), str(-float(minmax[0])))
+            else:
+                print("%s does not exist!!" % (file))
+
 
 def read_min_max(scenename):
     # -------------------------------------DECODED----------------------------------
@@ -241,9 +249,12 @@ def resize_origs(scenename):
     PATH = SCENES_DIRECTORY + scenename + "/orig/ambient/photos/*/pos*/exp*.JPG"
     resize_small_img(PATH)
 
-    # default ambient photos on home page
+    # default unrectified ambient photos on home page
     PATH = SCENES_DIRECTORY + scenename + "/orig/ambient/photos/default/pos*.JPG"
     resize_small_img(PATH)
+
+    # default rectified ambient photos on home page
+    PATH = SCENES_DIRECTORY + scenename + "/computed/ambient/rectified/default/pos*/*.png"
 
     # rectified ambient images
     PATH = SCENES_DIRECTORY + scenename + "/computed/ambient/rectified/*/pos*/*exp*.png"
@@ -329,9 +340,9 @@ def home(directory, scenes):
                     with tag("th"):
                         text("Dataset")
                     with tag("th"):
-                        text("Ambient")
+                        text("Unrectified Ambient")
                     with tag("th"):
-                        text("Final Result Preview")
+                        text("Rectified Ambient")
                     with tag("th"):
                         text("Final Result Preview")
                 row = 0
@@ -366,9 +377,9 @@ def home(directory, scenes):
                                 with tag("div", name="preview-container"):
                                     source = "%s%s/orig/ambient/photos/default/pos0.JPG" % ("./src/pngs/", scenename)
                                     with tag("a", href = source.replace("./src/pngs/", directory)):
-                                        home.stag("img", src=source, klass="row"+str(row), id= "orig"+str(row), style = "display: block")
+                                        home.stag("img", src=source, klass="row"+str(row), id= "unrec"+str(row), style = "display: block")
                                     position = 0
-                                    with tag("div", name="caption-container-home"+str(row), klass = "caption-container"):
+                                    with tag("div", name="caption-container-unrec"+str(row), klass = "caption-container"):
                                         text("pos"+str(position))
                                     for img in images:
                                         no = 0
@@ -376,20 +387,49 @@ def home(directory, scenes):
                                             with tag("a", href = img.replace("./src/pngs/", directory)):
                                                 home.stag("img", src=img, klass="row"+str(row), name="thumbnail",
                                                 id="thumb"+str(row)+str(position)+str(no),
-                                                onmouseover="posUpdateHome(%s, %s, %s, %s)" % ("orig"+str(row), str(row),str(position), str(no)))
+                                                onmouseover="posUpdateHome(%s, %s, %s, %s, 'unrec')" % ("unrec"+str(row), str(row),str(position), str(no)))
                                         position += 1
                             else:
                                 with tag("div"):
-                                    text("%s does not have default ambient images!" %(scenename))
+                                    text("%s does not have default unrectifeid ambient images!" %(scenename))
 
+                        with tag("th", klass="imgbox-container"):
+                            imgPath = "%s%s/computed/ambient/rectified/default/pos0/01rectified*.png" % ("./src/pngs/", scenename)
+                            image = glob.glob(imgPath)
+                            if image:
+                                with tag("div", name="preview-container"):
+                                    source = image[0]
+                                    with tag("a", href = source.replace("./src/pngs/", directory)):
+                                        home.stag("img", src=source, klass="row"+str(row), id= "rec" + str(row), style="display:block",
+                                                     onmouseover="swap(this,false)", onmouseout="restore(this, false)")
+                                    pospath = source[:source.rfind("pos") + 3] + "*"
+                                    positions = glob.glob(pospath)
+                                    positions.sort()
+                                    position = 0
+                                    with tag("div", name="caption-container-rec"+str(row), klass = "caption-container"):
+                                        text("pos"+str(position)+str(position+1))
+                                    for pos in positions:
+                                        imgpath = "%s/%srectified*.png"%(pos,str(position)+str(position+1))
+                                        img = glob.glob(imgpath)
+                                        if img:
+                                            source = img[0]
+                                            no = 1
+                                            with tag("div", name="thumbnail-container"):
+                                                with tag("a", href = source.replace("./src/pngs", directory), klass="imglink"):
+                                                    home.stag("img", src=source, klass = "row"+str(row)+" rec", id="thumb"+str(row)+str(position)+str(position+1)+str(no),
+                                                    onmouseover="posUpdateHome(%s, %s, %s, %s, 'rec')" % ("rec"+str(row), str(row),str(position), str(no)))
+                                        position += 1
+                            else: 
+                                with tag("div"):
+                                    text("%s does not have default rectified ambient images!" %(scenename))                                       
 
                         with tag("th"):
                             source = "./src/pngs/%s/computed/merged2/pos0/disp01x-4crosscheck2-jet-400.jpg" % (scenename)
-                            imageBoxDual(home, tag, text, "x"+str(row), source, 1, row)
+                            imageBoxDual(home, tag, text, "x"+str(row), source, 2, row)
 
-                        with tag("th"):
-                            source = "./src/pngs/%s/computed/merged2/pos1/disp01x-4crosscheck2-jet-400.jpg" % (scenename)
-                            imageBoxDual(home, tag, text, "x"+str(row), source, 2, row, reverse=True)
+                        # with tag("th"):
+                        #     source = "./src/pngs/%s/computed/merged2/pos1/disp01x-4crosscheck2-jet-400.jpg" % (scenename)
+                        #     imageBoxDual(home, tag, text, "x"+str(row), source, 2, row, reverse=True)
 
                     row += 1
 
@@ -474,7 +514,7 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", minmax = None
                             with tag("a", href = img.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
                                 doc.stag("img", src=img, klass=class1 + rec,
                                 id="thumb"+str(row)+str(position)+str(position-1)+str(no),
-                                onmouseover="posUpdateDisp('%s', '%s', %s, '%s')" % (str(row), str(position-1)+str(position),disp_bool,rec))
+                                onmouseover="posUpdateDisp('%s', '%s', '%s', %s, '%s')" % (str(row), str(position-1)+str(position),no-1, disp_bool,rec))
 
             else:
                 img = "%s/%s%s%s%s-jet-400.jpg" % (pos, tag1, str(position)+str(position+1), name[0],tag2)
@@ -483,7 +523,7 @@ def imageBoxDual(doc, tag, text, name, source, no, row, rec="rec", minmax = None
                         with tag("a", href = img.replace("-400.jpg", ".png"), name="imglink"+str(row), klass="imglink"):
                             doc.stag("img", src=img, klass=class1 + rec,
                             id="thumb"+str(row)+str(position)+str(position+1)+str(no),
-                            onmouseover="posUpdateDisp('%s', '%s', %s, '%s')" % (str(row), str(position)+str(position+1),disp_bool,rec))
+                            onmouseover="posUpdateDisp('%s', '%s', '%s', %s, '%s')" % (str(row), str(position)+str(position+1),no, disp_bool,rec))
             position += 1
 
 def description(scenename,directory):
@@ -625,7 +665,7 @@ def ambient(scenename,directory):
                             text("pos01")
                         with tag("th"):
                             text("pos10")
-                    dirs = glob.glob("./src/pngs/" + scenename + "/computed/ambient/rectified/*")
+                    dirs = glob.glob("./src/pngs/" + scenename + "/computed/ambient/rectified/?[0-9]")
                     dirs.sort()
                     row = 0
                     for dir in dirs:
@@ -1084,7 +1124,7 @@ if __name__ == "__main__":
             print("You already have a src folder. Put your scene folder in ./src/scenes, then run: python3 generate-web.py")
     else:
         if os.path.isdir('./src') and os.path.isdir('./src/pngs'):
-            scenes = convert_pfms(SCENES_DIRECTORY)
+            scenes = generate_images()
             home(SCENES_DIRECTORY, scenes)
         else:
             print("Make sure you have the necessary directory structure for the program to run.")

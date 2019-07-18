@@ -7,13 +7,23 @@ function changeView(pos, img) {
     }
 }
 
-function posUpdateHome(name, row, pos, no) {
-    var captions = document.getElementsByName("caption-container-home"+row)
-    for (var i=0; i<captions.length; i++) {
-        captions[i].innerHTML = "pos" + pos
+function posUpdateHome(name, row, pos, no, rec) {
+    if(rec == 'unrec'){
+	var captions = document.getElementsByName("caption-container-unrec"+row)
+	for (var i=0; i<captions.length; i++) {
+            captions[i].innerHTML = "pos" + pos
+	}
+	var image = "thumb" + row + pos + no;
+	name.src = document.getElementById(image).src
+    } else {
+	var captions = document.getElementsByName("caption-container-rec"+row)
+	for (var i=0; i<captions.length; i++) {
+            captions[i].innerHTML = "pos" + pos + (pos+1)
+	}
+	var image = "thumb" + row + pos + (pos+1) + no;
+	name.src = document.getElementById(image).src
+	
     }
-    var image = "thumb" + row + pos + no;
-    name.src = document.getElementById(image).src
 }
 
 function posUpdate(name, pos) {
@@ -36,7 +46,7 @@ function posUpdate(name, pos) {
 
 }
 
-function posUpdateDisp(name, pos, disparity = false, rec = 'rec') {
+function posUpdateDisp(name, pos, no, disparity = false, rec = 'rec') {
     var captions = document.getElementsByName("caption-container"+name)
     var images = document.getElementsByName(name)
     var links = document.getElementsByName("imglink"+name)
@@ -45,9 +55,9 @@ function posUpdateDisp(name, pos, disparity = false, rec = 'rec') {
         if (i == 1){
             pos = pos[1] + pos[0]
         }
-        var no = i + 1
         captions[i].innerHTML = "pos" + pos
-        image = "thumb" + name + pos + no;
+	console.log(no)
+        image = "thumb" + name + pos + no
         images[i].src = document.getElementById(image).src;
         newlink = document.getElementById(image).src
         newlink = newlink.substring(0,newlink.lastIndexOf("-")) + ".png"
@@ -55,6 +65,7 @@ function posUpdateDisp(name, pos, disparity = false, rec = 'rec') {
         newname = document.getElementById(image).src
         newname = newname.substring(newname.lastIndexOf("/")+1,)
         texts[i].innerHTML = newname
+	no = parseInt(no) + 1
     }
 
     if(disparity){
