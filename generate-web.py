@@ -568,7 +568,9 @@ def description(scenename,directory):
                 text("Scene Photos:")
             PATH = "./src/pngs/" + scenename + "/scenePictures/"
             if os.path.isdir(PATH):
-                imgs = glob.glob(PATH + "*.jpg")
+                imgs = []
+                for ext in ('*.jpeg', '*.jpg'):
+                    imgs.extend(glob.glob(PATH + ext))
                 with tag("div", style="width:100%"):
                     for img in imgs:
                         with tag("div", name="view-container", style="float:left; width: 30%;padding: 5px;margin:5px"):
