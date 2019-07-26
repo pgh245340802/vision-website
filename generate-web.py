@@ -185,8 +185,9 @@ def read_min_max(scenename):
                     mins.append(float(min_max[13]))
                     maxs.append(float(min_max[-7]))
                 counter += 1
-            truemin = str(min(mins))
-            truemax = str(max(maxs))
+            truemin = min(mins)
+            truemax = max(maxs)
+            truemin,truemax = str(truemin - (truemax-truemin)*0.05),str(truemax + (truemax-truemin)*0.05)
             txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
             txt = open(txtpath, "w")
             txt.write(truemin+"\n")
@@ -225,8 +226,9 @@ def read_min_max(scenename):
                     mins.append(float(min_max[13]))
                     maxs.append(float(min_max[-7]))
                 counter += 1
-            truemin = str(min(mins))
-            truemax = str(max(maxs))
+            truemin = min(mins)
+            truemax = max(maxs)
+            truemin,truemax = str(truemin - (truemax-truemin)*0.05),str(truemax + (truemax-truemin)*0.05)
             txtpath = "%s/pos%s/minmax-%s.txt" % (path, str(j), i)
             txt = open(txtpath, "w")
             txt.write(truemin+"\n")
@@ -238,42 +240,52 @@ def resize_origs(scenename):
     print("resizing original images for %s..."%(scenename))
 
     # stereo calibration images
-    PATH = SCENES_DIRECTORY + scenename + "/orig/calibration/stereo/pos*/IMG*.JPG"
-    resize_small_img(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/orig/calibration/stereo/pos*/"
+    fileName = ['*.JPG']
+    resize_small_img(PATH,fileName)
 
     # intrinsics calibration images
-    PATH = SCENES_DIRECTORY + scenename + "/orig/calibration/intrinsics/*.JPG"
-    resize_small_img(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/orig/calibration/intrinsics/"
+    fileName = ['*.JPG']
+    resize_small_img(PATH,fileName)
 
     # ambient photos
-    PATH = SCENES_DIRECTORY + scenename + "/orig/ambient/photos/*/pos*/exp*.JPG"
-    resize_small_img(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/orig/ambient/photos/*/pos*/"
+    fileName = ['*.JPG']
+    resize_small_img(PATH,fileName)
 
     # default unrectified ambient photos on home page
-    PATH = SCENES_DIRECTORY + scenename + "/defaultAmbient/unrectified/pos*.JPG"
-    resize_small_img(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/defaultAmbient/unrectified/"
+    fileName = ['*.JPG']
+    resize_small_img(PATH,fileName)
 
     # default rectified ambient photos on home page
-    PATH = SCENES_DIRECTORY + scenename + "/defaultAmbient/rectified/pos*/*.png"
-    resize_small_img(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/defaultAmbient/rectified/pos*/"
+    fileName = ['*.png']
+    resize_small_img(PATH,fileName)
 
     # rectified ambient images
-    PATH = SCENES_DIRECTORY + scenename + "/computed/ambient/rectified/*/pos*/*exp*.png"
-    resize_small_img(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/computed/ambient/rectified/*/pos*/"
+    fileName = ['*exp*.png']
+    resize_small_img(PATH,fileName)
 
     # ambient ball images
-    PATH = SCENES_DIRECTORY + scenename + "/orig/ambientBall/photos/*/pos*/exp*.JPG"
-    resize_small_img(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/orig/ambientBall/photos/*/pos*/"
+    fileName = ['exp*.JPG']
+    resize_small_img(PATH,fileName)
 
     # scene photos
-    PATH = SCENES_DIRECTORY + scenename + "/scenePictures/*.jpg"
-    resize_small_img(PATH)
+    PATH = SCENES_DIRECTORY + scenename + "/scenePictures/"
+    fileName = ['*.jpg','*.jpeg']
+    resize_small_img(PATH,fileName)
 
     print("resizing complete")
 
 
-def resize_small_img(img_path):
-    imgs = glob.glob(img_path)
+def resize_small_img(img_path,fileName):
+    imgs = []
+    for ext in fileName:
+        imgs.extend(glob.glob(img_path + ext))
     for img in imgs:
         smallimg = img.replace(SCENES_DIRECTORY, "./src/pngs/")
         if not os.path.isfile(smallimg):
