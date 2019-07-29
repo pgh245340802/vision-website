@@ -276,7 +276,12 @@ def resize_origs(scenename):
 
     # scene photos
     PATH = SCENES_DIRECTORY + scenename + "/scenePictures/"
-    fileName = ['*.jpg','*.jpeg']
+    fileName = ['*.jpg','*.jpeg','*.png']
+    resize_small_img(PATH,fileName)
+
+    # new scene photos structure
+    PATH = SCENES_DIRECTORY + scenename + "/sceneInfo/scenePictures/"
+    fileName = ['*.jpg','*.jpeg','*.png']
     resize_small_img(PATH,fileName)
 
     print("resizing complete")
@@ -552,12 +557,16 @@ def description(scenename,directory):
             with tag("h2"):
                 text("Scene Desctiption:")
             with tag("div"):
+                file = None
                 try:
                     file = open(directory+ scenename + "/sceneDescription.txt","r")
                 except:
-                    with tag("p"):
-                        text(scenename + " does not have a scene description file")
-                else:
+                    try:
+                        file = open(directory+ scenename + "/sceneInfo/sceneDescription.txt","r")
+                    except:
+                        with tag("p"):
+                            text(scenename + " does not have a scene description file")
+                if file:
                     for line in file:
                         if line == "\n":
                             doc.stag('br')
@@ -567,10 +576,12 @@ def description(scenename,directory):
             with tag("h2"):
                 text("Scene Photos:")
             PATH = "./src/pngs/" + scenename + "/scenePictures/"
-            if os.path.isdir(PATH):
+            PATH2 = "./src/pngs/" + scenename + "/sceneInfo/scenePictures/"
+            if os.path.isdir(PATH) or os.path.isdir(PATH2):
                 imgs = []
-                for ext in ('*.jpeg', '*.jpg'):
+                for ext in ('*.jpeg', '*.jpg','*.png'):
                     imgs.extend(glob.glob(PATH + ext))
+                    imgs.extend(glob.glob(PATH2 + ext))
                 with tag("div", style="width:100%"):
                     for img in imgs:
                         with tag("div", name="view-container", style="float:left; width: 30%;padding: 5px;margin:5px"):
