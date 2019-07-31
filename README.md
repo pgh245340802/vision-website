@@ -1,6 +1,6 @@
 # Automatic Website Creation
 
-The goal of this project is to automatically generate a website from a scene folder that is produced by the MobileLighting app. Once the program is successfully executed, several HTML files will be generated, with the main page named home.html.All the related images will be converted and stored in the folder src. Right now, this program has only been tested on Middlebury College basin.
+The goal of this project is to automatically generate a website from a scene folder that is produced by the MobileLighting app. Once the program is successfully executed, several HTML files will be generated, with the main page named home.html.All the related images will be converted and stored in the folder src. Right now, this program has only been tested on Middlebury College basin and macOS.
 
 ## Getting Started
 
@@ -18,9 +18,9 @@ pip install yattag
 
 More details about installing yattag can be found here:http://www.yattag.org/download-install. This includes a way to install yattag without using pip.
 
-You should also have ImageMagick(http://www.imagemagick.org/script/index.php) installed on your computer before you try to run the program since it uses ImageMagick to resize images and convert formats. Here is a link to the instrunctions to download ImageMagick onto your own computer: http://www.imagemagick.org/script/download.php. If you are not familiar with ImageMagick, here is a brief guide to what it can do and how to use it: http://www.imagemagick.org/Usage/. However, this is not necessary for this project since all ImageMagick commands are already written.
+You should also have ImageMagick(http://www.imagemagick.org/script/index.php) installed on your computer before you try to run the program since it uses ImageMagick to resize images and convert formats. Here is a link to the instructions to download ImageMagick onto your own computer: http://www.imagemagick.org/script/download.php. If you are not familiar with ImageMagick, here is a brief guide to what it can do and how to use it: http://www.imagemagick.org/Usage/. However, this is not necessary for this project since all ImageMagick commands are already written.
 
-Finally, before we can have the everything running, this program uses the the pfm2png and imginfo cpp programs from Professor Scharstein's utils folder. Copy that folder from basin, and remake it locally.
+Finally, before we can have the everything running, this program uses the the pfm2png, imginfo, and pfmquantiles cpp programs from Professor Scharstein's utils folder. Copy that folder from basin, and remake it locally.
 
 
 ### Installing
@@ -54,27 +54,19 @@ The program might take a while to complete, since it is converting a lot of imag
     b. For merged images, a similar process is carried out. However, this time, not all images under the same projector position share the same disparity range. Instead, each image pair, e.g. pos01 and pos10, share the same disparity range. The program finds the minimum and maximum disparity for both images. Then, for the second position, it swaps and minimum and maximum and changes their signs. Then the program uses the minimum of the minimum and maximum of the maximum as the communal disparity range for these two positions. This range is written into a text file stored under each pos folder except for the last one since there are one fewer pair than positions.
 
 2. The program creates an HTML file named home.html, which contains a table of all scenes. **This is the one you should visit after the program is completed**.
-3. The program loops through all scene folders and adds one row for each scene. It also creates the following webpages for each scene: *scenename*-decoded.html, *scenename*-calib.html, *scenename*-xdisparity.html and *scenename*-ydisparity.html. There are links to all of them on the home page.
+3. The program loops through all scene folders and adds one row for each scene. It also creates the following webpages for each scene: *scenename*-description.html, *scenename*-ambient.html, *scenename*-decoded.html, *scenename*-calib.html, *scenename*-xdisparity.html and *scenename*-ydisparity.html. There are links to all of them on the home page.
 
 ### Important functions of the website
 
 1. There are previews of images from all camera positions under each main image, and the user can mouse over them to change the main images displayed.
 
-2. There are previews of images from all projector positions on the left of the row that has different projector positions, and the user can mouse over them to change the main images displayed.
+2. For the decoded pages, there are previews of images from all projector positions on the left of the row that has different projector positions, and the user can mouse over them to change the main images displayed.
 
-3. In each detailed scene page(decoded, xdisparity, ydisparity), the user can choose to view only the rectified images or only the unrectified ones. The user can also switch between viewing images in 400 width and 600 width. Finally, the user can also switch between spiral and jet pngs.
+1. For the rectified images, the user can mouse over them to flip to the other view.
 
-## Potential Improvements:
+1. For the unrectified ambient images, the user can mouse over them to flip to the ambient ball images.
 
-As the summer approaches an end, I have to leave the program as it is. However, the following improvements could be made to the program, either by myself after summer, or by another student who keeps working on the project. Once a improvement is completed, it will be marked italics.
-
-1. Update the text descriptions on the website to fit the new dataset.
-
-2. *Display the disparity range used to convert each pfm below each file name.*
-
-3. Some of the ydisparity images appear oddly blue. This might have something to do with the minimum and maximum values used to convert them from pfms to pngs.
-
-4. *The formatting of the webpage changes a bit after toggling between different buttons. It needs to stay the same.*
+3. In each detailed scene page(ambient, decoded, xdisparity, ydisparity), the user can choose to view only the rectified images or only the unrectified ones. The user can also switch between viewing images in 400 width and 600 width. Finally, the user can also switch between spiral and jet pngs.
 
 ## Author
 
